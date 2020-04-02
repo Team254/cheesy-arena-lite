@@ -108,8 +108,10 @@ html {
 }
 #logo {
   position: relative;
+  padding-top: 5px;
+  padding-bottom: 5px;
   top: 30px;
-  height: 90px;
+  height: 85px;
 }
 #matchTime {
   position: relative;
@@ -202,7 +204,7 @@ html {
 #blindsLogo {
   position: relative;
   top: 37px;
-  height: 250px;
+  height: 185px;
 }
 #finalScore {
   position: fixed;
@@ -394,7 +396,7 @@ html {
 }
 #allianceSelectionTable img {
   width: 6em;
-  margin: -0.2em;
+  margin: 0.2em;
 }
 #allianceSelectionTable tr:nth-child(even) {
   background-color: #ccc;
