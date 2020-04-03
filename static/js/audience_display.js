@@ -85,12 +85,6 @@ var handleMatchTime = function(data) {
 var handleRealtimeScore = function(data) {
   $("#" + redSide + "ScoreNumber").text(data.Red.ScoreSummary.Score - data.Red.ScoreSummary.EndgamePoints);
   $("#" + blueSide + "ScoreNumber").text(data.Blue.ScoreSummary.Score - data.Blue.ScoreSummary.EndgamePoints);
-
-  for (var i = 0; i < 3; i++) {
-    var i1 = i + 1;
-    setPowerCellText($("#" + redSide + "Stage" + i1), data.Red.ScoreSummary, i);
-    setPowerCellText($("#" + blueSide + "Stage" + i1), data.Blue.ScoreSummary, i);
-  }
 };
 
 // Handles a websocket message to populate the final score data.
@@ -102,15 +96,6 @@ var handleScorePosted = function(data) {
   $("#" + redSide + "FinalTeam1Avatar").attr("src", getAvatarUrl(data.Match.Red1));
   $("#" + redSide + "FinalTeam2Avatar").attr("src", getAvatarUrl(data.Match.Red2));
   $("#" + redSide + "FinalTeam3Avatar").attr("src", getAvatarUrl(data.Match.Red3));
-  $("#" + redSide + "FinalInitiationLinePoints").text(data.RedScoreSummary.InitiationLinePoints);
-  $("#" + redSide + "FinalPowerCellPoints").text(data.RedScoreSummary.PowerCellPoints);
-  $("#" + redSide + "FinalControlPanelPoints").text(data.RedScoreSummary.ControlPanelPoints);
-  $("#" + redSide + "FinalEndgamePoints").text(data.RedScoreSummary.EndgamePoints);
-  $("#" + redSide + "FinalFoulPoints").text(data.RedScoreSummary.FoulPoints);
-  $("#" + redSide + "FinalControlPanelRankingPoint").html(data.RedScoreSummary.ControlPanelRankingPoint ? "&#x2714;" : "&#x2718;");
-  $("#" + redSide + "FinalControlPanelRankingPoint").attr("data-checked", data.RedScoreSummary.ControlPanelRankingPoint);
-  $("#" + redSide + "FinalEndgameRankingPoint").html(data.RedScoreSummary.EndgameRankingPoint ? "&#x2714;" : "&#x2718;");
-  $("#" + redSide + "FinalEndgameRankingPoint").attr("data-checked", data.RedScoreSummary.EndgameRankingPoint);
   $("#" + blueSide + "FinalScore").text(data.BlueScoreSummary.Score);
   $("#" + blueSide + "FinalTeam1").html(data.Match.Blue1 + "" + getRankingText(data.Match.Blue1, data.Rankings));
   $("#" + blueSide + "FinalTeam2").html(data.Match.Blue2 + "" + getRankingText(data.Match.Blue2, data.Rankings));
@@ -118,15 +103,6 @@ var handleScorePosted = function(data) {
   $("#" + blueSide + "FinalTeam1Avatar").attr("src", getAvatarUrl(data.Match.Blue1));
   $("#" + blueSide + "FinalTeam2Avatar").attr("src", getAvatarUrl(data.Match.Blue2));
   $("#" + blueSide + "FinalTeam3Avatar").attr("src", getAvatarUrl(data.Match.Blue3));
-  $("#" + blueSide + "FinalInitiationLinePoints").text(data.BlueScoreSummary.InitiationLinePoints);
-  $("#" + blueSide + "FinalPowerCellPoints").text(data.BlueScoreSummary.PowerCellPoints);
-  $("#" + blueSide + "FinalControlPanelPoints").text(data.BlueScoreSummary.ControlPanelPoints);
-  $("#" + blueSide + "FinalEndgamePoints").text(data.BlueScoreSummary.EndgamePoints);
-  $("#" + blueSide + "FinalFoulPoints").text(data.BlueScoreSummary.FoulPoints);
-  $("#" + blueSide + "FinalControlPanelRankingPoint").html(data.BlueScoreSummary.ControlPanelRankingPoint ? "&#x2714;" : "&#x2718;");
-  $("#" + blueSide + "FinalControlPanelRankingPoint").attr("data-checked", data.BlueScoreSummary.ControlPanelRankingPoint);
-  $("#" + blueSide + "FinalEndgameRankingPoint").html(data.BlueScoreSummary.EndgameRankingPoint ? "&#x2714;" : "&#x2718;");
-  $("#" + blueSide + "FinalEndgameRankingPoint").attr("data-checked", data.BlueScoreSummary.EndgameRankingPoint);
   $("#finalSeriesStatus").text(data.SeriesStatus);
   $("#finalSeriesStatus").attr("data-leader", data.SeriesLeader);
   $("#finalMatchName").text(data.MatchType + " " + data.Match.DisplayName);
@@ -465,20 +441,6 @@ var initializeSponsorDisplay = function() {
 
 var getAvatarUrl = function(teamId) {
   return "/api/teams/" + teamId + "/avatar";
-};
-
-// Populates the given element on the overlay to represent the given power cell stage.
-var setPowerCellText = function(element, scoreSummary, stage) {
-  var text = "&nbsp;";
-  var opacity = 1;
-  if (scoreSummary.StagesActivated[stage]) {
-    text = "I".repeat(stage + 1);
-    opacity = 0.4;
-  } else if (stage === 0 || scoreSummary.StagesActivated[stage - 1]) {
-    text = scoreSummary.StagePowerCellsRemaining[stage];
-  }
-  element.html(text);
-  element.css("opacity", opacity);
 };
 
 // Returns the string to be displayed next to the team number on the final score screen, to indicate change in rank.
