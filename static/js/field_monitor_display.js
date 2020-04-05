@@ -19,12 +19,16 @@ var handleArenaStatus = function(data) {
       teamElementPrefix = "#" + blueSide + "Team" + station[1];
     }
     var teamIdElement = $(teamElementPrefix + "Id");
+    var teamNotesElement = $(teamElementPrefix + "Notes");
+    var teamNotesTextElement = $(teamElementPrefix + "Notes div");
     var teamEthernetElement = $(teamElementPrefix + "Ethernet");
     var teamDsElement = $(teamElementPrefix + "Ds");
     var teamRadioElement = $(teamElementPrefix + "Radio");
     var teamRadioTextElement = $(teamElementPrefix + "Radio span");
     var teamRobotElement = $(teamElementPrefix + "Robot");
     var teamBypassElement = $(teamElementPrefix + "Bypass");
+
+    teamNotesTextElement.attr("data-station", station);
 
     if (stationStatus.Team) {
       // Set the team number and status.
@@ -42,10 +46,13 @@ var handleArenaStatus = function(data) {
         }
       }
       teamIdElement.attr("data-status", status);
+      teamNotesTextElement.text(stationStatus.Team.FtaNotes);
+      teamNotesElement.attr("data-status", status);
     } else {
       // No team is present in this position for this match; blank out the status.
       teamIdElement.text("");
-      teamIdElement.attr("data-status", "");
+      teamNotesTextElement.text("");
+      teamNotesElement.attr("data-status", "");
     }
 
     // Format the Ethernet status box.
@@ -119,6 +126,21 @@ var handleEventStatus = function(data) {
   $("#earlyLateMessage").text(data.EarlyLateMessage);
 };
 
+// Makes the team notes section editable and handles saving edits to the server.
+var editFtaNotes = function(element) {
+  var teamNotesTextElement = $(element);
+  var textArea = $("<textarea />");
+  textArea.val(teamNotesTextElement.text());
+  teamNotesTextElement.replaceWith(textArea);
+  textArea.focus();
+  textArea.blur(function() {
+    textArea.replaceWith(teamNotesTextElement);
+    if (textArea.val() !== teamNotesTextElement.text()) {
+      websocket.send("updateTeamNotes", { station: teamNotesTextElement.attr("data-station"), notes: textArea.val()});
+    }
+  });
+};
+
 $(function() {
   // Read the configuration for this display from the URL query string.
   var urlParams = new URLSearchParams(window.location.search);
@@ -132,6 +154,7 @@ $(function() {
   }
   $(".reversible-left").attr("data-reversed", reversed);
   $(".reversible-right").attr("data-reversed", reversed);
+  $(".fta-dependent").attr("data-fta", urlParams.get("fta"));
 
   // Set up the websocket back to the server.
   websocket = new CheesyWebsocket("/displays/field_monitor/websocket", {
