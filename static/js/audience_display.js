@@ -96,6 +96,9 @@ var handleScorePosted = function(data) {
   $("#" + redSide + "FinalTeam1Avatar").attr("src", getAvatarUrl(data.Match.Red1));
   $("#" + redSide + "FinalTeam2Avatar").attr("src", getAvatarUrl(data.Match.Red2));
   $("#" + redSide + "FinalTeam3Avatar").attr("src", getAvatarUrl(data.Match.Red3));
+  $("#" + redSide + "FinalAutoPoints").text(data.RedScoreSummary.AutoPoints);
+  $("#" + redSide + "FinalTeleopPoints").text(data.RedScoreSummary.TeleopPoints);
+  $("#" + redSide + "FinalEndgamePoints").text(data.RedScoreSummary.EndgamePoints);
   $("#" + blueSide + "FinalScore").text(data.BlueScoreSummary.Score);
   $("#" + blueSide + "FinalTeam1").html(data.Match.Blue1 + "" + getRankingText(data.Match.Blue1, data.Rankings));
   $("#" + blueSide + "FinalTeam2").html(data.Match.Blue2 + "" + getRankingText(data.Match.Blue2, data.Rankings));
@@ -103,6 +106,9 @@ var handleScorePosted = function(data) {
   $("#" + blueSide + "FinalTeam1Avatar").attr("src", getAvatarUrl(data.Match.Blue1));
   $("#" + blueSide + "FinalTeam2Avatar").attr("src", getAvatarUrl(data.Match.Blue2));
   $("#" + blueSide + "FinalTeam3Avatar").attr("src", getAvatarUrl(data.Match.Blue3));
+  $("#" + blueSide + "FinalAutoPoints").text(data.BlueScoreSummary.AutoPoints);
+  $("#" + blueSide + "FinalTeleopPoints").text(data.BlueScoreSummary.TeleopPoints);
+  $("#" + blueSide + "FinalEndgamePoints").text(data.BlueScoreSummary.EndgamePoints);
   $("#finalSeriesStatus").text(data.SeriesStatus);
   $("#finalSeriesStatus").attr("data-leader", data.SeriesLeader);
   $("#finalMatchName").text(data.MatchType + " " + data.Match.DisplayName);
@@ -268,7 +274,7 @@ var transitionLogoToBlank = function(callback) {
 };
 
 var transitionLogoToScore = function(callback) {
-  $(".blindsCenter.full").transition({queue: false, top: "-350px"}, 625, "ease");
+  $(".blindsCenter.full").transition({queue: false, top: "-225px"}, 625, "ease");
   $("#finalScore").show();
   $("#finalScore").transition({queue: false, opacity: 1}, 1000, "ease", callback);
 };

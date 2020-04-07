@@ -209,8 +209,8 @@ html {
 #finalScore {
   position: fixed;
   width: 1200px;
-  height: 300px;
-  top: 5px;
+  height: 450px;
+  top: 65px;
   bottom: 0;
   left: 0;
   right: 0;
@@ -223,8 +223,8 @@ html {
 .final-score {
   float: left;
   width: 50%;
-  height: 65%;
-  line-height: 200px;
+  height: 50%;
+  line-height: 225px;
   border-bottom: 2px solid #333;
   color: #fff;
   font-family: "FuturaLTBold";
@@ -242,14 +242,13 @@ html {
 .final-teams {
   float: left;
   width: 50%;
-  height: 18%;
+  height: 12%;
   overflow: hidden;
   line-height: 50px;
   text-align: center;
   color: #fff;
   font-family: "FuturaLT";
   font-size: 32px;
-  border-bottom: 2px solid #333;
 }
 .final-teams span {
   margin: 0 10px;
@@ -272,10 +271,34 @@ html {
 #rightFinalTeams {
   padding-left: 5%;
 }
+.final-breakdown {
+  float: left;
+  width: 33%;
+  height: 28%;
+  padding: 0px 20px;
+  display: table;
+  text-align: center;
+  background-color: #fff;
+  color: #222;
+  font-family: "FuturaLT";
+  font-size: 24px;
+}
+#leftFinalBreakdown {
+  clear: left;
+  text-align: right;
+}
+#rightFinalBreakdown {
+  text-align: left;
+}
+#centerFinalBreakdown {
+  width: 34%;
+  border-left: 2px solid #333;
+  border-right: 2px solid #333;
+}
 #finalEventMatchInfo {
   clear: both;
   width: 100%;
-  height: 15%;
+  height: 9%;
   line-height: 50px;
   padding: 0px 25px;
   font-family: "FuturaLT";
