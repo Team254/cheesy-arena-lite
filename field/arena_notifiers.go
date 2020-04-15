@@ -29,7 +29,6 @@ type ArenaNotifiers struct {
 	RealtimeScoreNotifier              *websocket.Notifier
 	ReloadDisplaysNotifier             *websocket.Notifier
 	ScorePostedNotifier                *websocket.Notifier
-	ScoringStatusNotifier              *websocket.Notifier
 }
 
 type MatchTimeMessage struct {
@@ -40,7 +39,6 @@ type MatchTimeMessage struct {
 type audienceAllianceScoreFields struct {
 	Score        *game.Score
 	ScoreSummary *game.ScoreSummary
-	ControlPanel *game.ControlPanel
 }
 
 // Instantiates notifiers and configures their message producing methods.
@@ -62,7 +60,6 @@ func (arena *Arena) configureNotifiers() {
 	arena.RealtimeScoreNotifier = websocket.NewNotifier("realtimeScore", arena.generateRealtimeScoreMessage)
 	arena.ReloadDisplaysNotifier = websocket.NewNotifier("reload", nil)
 	arena.ScorePostedNotifier = websocket.NewNotifier("scorePosted", arena.generateScorePostedMessage)
-	arena.ScoringStatusNotifier = websocket.NewNotifier("scoringStatus", arena.generateScoringStatusMessage)
 }
 
 func (arena *Arena) generateAllianceSelectionMessage() interface{} {
@@ -160,8 +157,8 @@ func (arena *Arena) generateRealtimeScoreMessage() interface{} {
 		Blue *audienceAllianceScoreFields
 		MatchState
 	}{}
-	fields.Red = getAudienceAllianceScoreFields(arena.RedRealtimeScore, arena.RedScoreSummary())
-	fields.Blue = getAudienceAllianceScoreFields(arena.BlueRealtimeScore, arena.BlueScoreSummary())
+	fields.Red = getAudienceAllianceScoreFields(arena.RedScore, arena.RedScoreSummary())
+	fields.Blue = getAudienceAllianceScoreFields(arena.BlueScore, arena.BlueScoreSummary())
 	fields.MatchState = arena.MatchState
 	return &fields
 }
@@ -208,53 +205,18 @@ func (arena *Arena) generateScorePostedMessage() interface{} {
 		RedScoreSummary  *game.ScoreSummary
 		BlueScoreSummary *game.ScoreSummary
 		Rankings         map[int]game.Ranking
-		RedFouls         []game.Foul
-		BlueFouls        []game.Foul
-		RulesViolated    map[int]*game.Rule
-		RedCards         map[string]string
-		BlueCards        map[string]string
 		SeriesStatus     string
 		SeriesLeader     string
-	}{arena.SavedMatch.CapitalizedType(), arena.SavedMatch, arena.SavedMatchResult.RedScoreSummary(true),
-		arena.SavedMatchResult.BlueScoreSummary(true), rankings, arena.SavedMatchResult.RedScore.Fouls,
-		arena.SavedMatchResult.BlueScore.Fouls,
-		getRulesViolated(arena.SavedMatchResult.RedScore.Fouls, arena.SavedMatchResult.BlueScore.Fouls),
-		arena.SavedMatchResult.RedCards, arena.SavedMatchResult.BlueCards, seriesStatus, seriesLeader}
-}
-
-func (arena *Arena) generateScoringStatusMessage() interface{} {
-	return &struct {
-		RefereeScoreReady         bool
-		RedScoreReady             bool
-		BlueScoreReady            bool
-		NumRedScoringPanels       int
-		NumRedScoringPanelsReady  int
-		NumBlueScoringPanels      int
-		NumBlueScoringPanelsReady int
-	}{arena.RedRealtimeScore.FoulsCommitted && arena.BlueRealtimeScore.FoulsCommitted,
-		arena.alliancePostMatchScoreReady("red"), arena.alliancePostMatchScoreReady("blue"),
-		arena.ScoringPanelRegistry.GetNumPanels("red"), arena.ScoringPanelRegistry.GetNumScoreCommitted("red"),
-		arena.ScoringPanelRegistry.GetNumPanels("blue"), arena.ScoringPanelRegistry.GetNumScoreCommitted("blue")}
+	}{arena.SavedMatch.CapitalizedType(), arena.SavedMatch, arena.SavedMatchResult.RedScoreSummary(),
+		arena.SavedMatchResult.BlueScoreSummary(), rankings,
+		seriesStatus, seriesLeader}
 }
 
 // Constructs the data object for one alliance sent to the audience display for the realtime scoring overlay.
-func getAudienceAllianceScoreFields(allianceScore *RealtimeScore,
+func getAudienceAllianceScoreFields(allianceScore *game.Score,
 	allianceScoreSummary *game.ScoreSummary) *audienceAllianceScoreFields {
 	fields := new(audienceAllianceScoreFields)
-	fields.Score = &allianceScore.CurrentScore
+	fields.Score = allianceScore
 	fields.ScoreSummary = allianceScoreSummary
-	fields.ControlPanel = &allianceScore.ControlPanel
 	return fields
-}
-
-// Produce a map of rules that were violated by either alliance so that they are available to the announcer.
-func getRulesViolated(redFouls, blueFouls []game.Foul) map[int]*game.Rule {
-	rules := make(map[int]*game.Rule)
-	for _, foul := range redFouls {
-		rules[foul.RuleId] = game.GetRuleById(foul.RuleId)
-	}
-	for _, foul := range blueFouls {
-		rules[foul.RuleId] = game.GetRuleById(foul.RuleId)
-	}
-	return rules
 }

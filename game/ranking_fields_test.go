@@ -14,40 +14,36 @@ func TestAddScoreSummary(t *testing.T) {
 	rand.Seed(0)
 	redScore := TestScore1()
 	blueScore := TestScore2()
-	redSummary := redScore.Summarize(blueScore.Fouls, true)
-	blueSummary := blueScore.Summarize(redScore.Fouls, true)
+	redSummary := redScore.Summarize()
+	blueSummary := blueScore.Summarize()
 	rankingFields := RankingFields{}
 
 	// Add a loss.
-	rankingFields.AddScoreSummary(redSummary, blueSummary, false)
-	assert.Equal(t, RankingFields{1, 94, 75, 48, 0.9451961492941164, 0, 1, 0, 0, 1}, rankingFields)
+	rankingFields.AddScoreSummary(redSummary, blueSummary)
+	assert.Equal(t, RankingFields{2, 45, 30, 80, 0.9451961492941164, 1, 0, 0, 1}, rankingFields)
 
 	// Add a win.
-	rankingFields.AddScoreSummary(blueSummary, redSummary, false)
-	assert.Equal(t, RankingFields{4, 111, 125, 200, 0.24496508529377975, 1, 1, 0, 0, 2}, rankingFields)
+	rankingFields.AddScoreSummary(blueSummary, redSummary)
+	assert.Equal(t, RankingFields{2, 60, 55, 120, 0.24496508529377975, 1, 1, 0, 2}, rankingFields)
 
 	// Add a tie.
-	rankingFields.AddScoreSummary(redSummary, redSummary, false)
-	assert.Equal(t, RankingFields{6, 205, 200, 248, 0.6559562651954052, 1, 1, 1, 0, 3}, rankingFields)
-
-	// Add a disqualification.
-	rankingFields.AddScoreSummary(blueSummary, redSummary, true)
-	assert.Equal(t, RankingFields{6, 205, 200, 248, 0.05434383959970039, 1, 1, 1, 1, 4}, rankingFields)
+	rankingFields.AddScoreSummary(redSummary, redSummary)
+	assert.Equal(t, RankingFields{3, 105, 85, 200, 0.6559562651954052, 1, 1, 1, 3}, rankingFields)
 }
 
 func TestSortRankings(t *testing.T) {
 	// Check tiebreakers.
 	rankings := make(Rankings, 10)
-	rankings[0] = Ranking{1, 0, 0, RankingFields{50, 50, 50, 50, 0.49, 3, 2, 1, 0, 10}}
-	rankings[1] = Ranking{2, 0, 0, RankingFields{50, 50, 50, 50, 0.51, 3, 2, 1, 0, 10}}
-	rankings[2] = Ranking{3, 0, 0, RankingFields{50, 50, 50, 49, 0.50, 3, 2, 1, 0, 10}}
-	rankings[3] = Ranking{4, 0, 0, RankingFields{50, 50, 50, 51, 0.50, 3, 2, 1, 0, 10}}
-	rankings[4] = Ranking{5, 0, 0, RankingFields{50, 50, 49, 50, 0.50, 3, 2, 1, 0, 10}}
-	rankings[5] = Ranking{6, 0, 0, RankingFields{50, 50, 51, 50, 0.50, 3, 2, 1, 0, 10}}
-	rankings[6] = Ranking{7, 0, 0, RankingFields{50, 49, 50, 50, 0.50, 3, 2, 1, 0, 10}}
-	rankings[7] = Ranking{8, 0, 0, RankingFields{50, 51, 50, 50, 0.50, 3, 2, 1, 0, 10}}
-	rankings[8] = Ranking{9, 0, 0, RankingFields{49, 50, 50, 50, 0.50, 3, 2, 1, 0, 10}}
-	rankings[9] = Ranking{10, 0, 0, RankingFields{51, 50, 50, 50, 0.50, 3, 2, 1, 0, 10}}
+	rankings[0] = Ranking{1, 0, 0, RankingFields{50, 50, 50, 50, 0.49, 3, 2, 1, 10}}
+	rankings[1] = Ranking{2, 0, 0, RankingFields{50, 50, 50, 50, 0.51, 3, 2, 1, 10}}
+	rankings[2] = Ranking{3, 0, 0, RankingFields{50, 50, 50, 49, 0.50, 3, 2, 1, 10}}
+	rankings[3] = Ranking{4, 0, 0, RankingFields{50, 50, 50, 51, 0.50, 3, 2, 1, 10}}
+	rankings[4] = Ranking{5, 0, 0, RankingFields{50, 50, 49, 50, 0.50, 3, 2, 1, 10}}
+	rankings[5] = Ranking{6, 0, 0, RankingFields{50, 50, 51, 50, 0.50, 3, 2, 1, 10}}
+	rankings[6] = Ranking{7, 0, 0, RankingFields{50, 49, 50, 50, 0.50, 3, 2, 1, 10}}
+	rankings[7] = Ranking{8, 0, 0, RankingFields{50, 51, 50, 50, 0.50, 3, 2, 1, 10}}
+	rankings[8] = Ranking{9, 0, 0, RankingFields{49, 50, 50, 50, 0.50, 3, 2, 1, 10}}
+	rankings[9] = Ranking{10, 0, 0, RankingFields{51, 50, 50, 50, 0.50, 3, 2, 1, 10}}
 	sort.Sort(rankings)
 	assert.Equal(t, 10, rankings[0].TeamId)
 	assert.Equal(t, 8, rankings[1].TeamId)
@@ -62,9 +58,9 @@ func TestSortRankings(t *testing.T) {
 
 	// Check with unequal number of matches played.
 	rankings = make(Rankings, 3)
-	rankings[0] = Ranking{1, 0, 0, RankingFields{10, 25, 25, 25, 0.49, 3, 2, 1, 0, 5}}
-	rankings[1] = Ranking{2, 0, 0, RankingFields{19, 50, 50, 50, 0.51, 3, 2, 1, 0, 9}}
-	rankings[2] = Ranking{3, 0, 0, RankingFields{20, 50, 50, 50, 0.51, 3, 2, 1, 0, 10}}
+	rankings[0] = Ranking{1, 0, 0, RankingFields{10, 25, 25, 25, 0.49, 3, 2, 1, 5}}
+	rankings[1] = Ranking{2, 0, 0, RankingFields{19, 50, 50, 50, 0.51, 3, 2, 1, 9}}
+	rankings[2] = Ranking{3, 0, 0, RankingFields{20, 50, 50, 50, 0.51, 3, 2, 1, 10}}
 	sort.Sort(rankings)
 	assert.Equal(t, 2, rankings[0].TeamId)
 	assert.Equal(t, 3, rankings[1].TeamId)

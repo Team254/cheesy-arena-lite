@@ -9,7 +9,6 @@ import (
 	"github.com/Team254/cheesy-arena/field"
 	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
-	"github.com/Team254/cheesy-arena/tournament"
 	"github.com/Team254/cheesy-arena/websocket"
 	gorillawebsocket "github.com/gorilla/websocket"
 	"github.com/mitchellh/mapstructure"
@@ -133,7 +132,7 @@ func TestCommitMatch(t *testing.T) {
 	web.arena.Database.CreateMatch(match)
 	matchResult = model.NewMatchResult()
 	matchResult.MatchId = match.Id
-	matchResult.BlueScore = &game.Score{ExitedInitiationLine: [3]bool{true, false, false}}
+	matchResult.BlueScore = &game.Score{AutoPoints: 10}
 	err = web.commitMatchScore(match, matchResult, true)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, matchResult.PlayNumber)
@@ -142,7 +141,7 @@ func TestCommitMatch(t *testing.T) {
 
 	matchResult = model.NewMatchResult()
 	matchResult.MatchId = match.Id
-	matchResult.RedScore = &game.Score{ExitedInitiationLine: [3]bool{true, false, true}}
+	matchResult.RedScore = &game.Score{AutoPoints: 20}
 	err = web.commitMatchScore(match, matchResult, true)
 	assert.Nil(t, err)
 	assert.Equal(t, 2, matchResult.PlayNumber)
@@ -175,10 +174,8 @@ func TestCommitEliminationTie(t *testing.T) {
 	match := &model.Match{Id: 0, Type: "qualification", Red1: 1, Red2: 2, Red3: 3, Blue1: 4, Blue2: 5, Blue3: 6}
 	web.arena.Database.CreateMatch(match)
 	matchResult := &model.MatchResult{
-		MatchId: match.Id,
-		RedScore: &game.Score{
-			TeleopCellsInner: [4]int{1, 2, 0, 0},
-			Fouls:            []game.Foul{{RuleId: 1}, {RuleId: 2}, {RuleId: 4}}},
+		MatchId:   match.Id,
+		RedScore:  &game.Score{},
 		BlueScore: &game.Score{},
 	}
 	err := web.commitMatchScore(match, matchResult, true)
@@ -190,54 +187,6 @@ func TestCommitEliminationTie(t *testing.T) {
 	web.commitMatchScore(match, matchResult, true)
 	match, _ = web.arena.Database.GetMatchById(1)
 	assert.Equal(t, model.TieMatch, match.Status) // No elimination tiebreakers.
-}
-
-func TestCommitCards(t *testing.T) {
-	web := setupTestWeb(t)
-
-	// Check that a yellow card sticks with a team.
-	team := &model.Team{Id: 5}
-	web.arena.Database.CreateTeam(team)
-	match := &model.Match{Id: 0, Type: "qualification", Red1: 1, Red2: 2, Red3: 3, Blue1: 4, Blue2: 5, Blue3: 6}
-	web.arena.Database.CreateMatch(match)
-	matchResult := model.NewMatchResult()
-	matchResult.MatchId = match.Id
-	matchResult.BlueCards = map[string]string{"5": "yellow"}
-	err := web.commitMatchScore(match, matchResult, true)
-	assert.Nil(t, err)
-	team, _ = web.arena.Database.GetTeamById(5)
-	assert.True(t, team.YellowCard)
-
-	// Check that editing a match result removes a yellow card from a team.
-	matchResult = model.NewMatchResult()
-	matchResult.MatchId = match.Id
-	err = web.commitMatchScore(match, matchResult, true)
-	assert.Nil(t, err)
-	team, _ = web.arena.Database.GetTeamById(5)
-	assert.False(t, team.YellowCard)
-
-	// Check that a red card causes a yellow card to stick with a team.
-	matchResult = model.NewMatchResult()
-	matchResult.MatchId = match.Id
-	matchResult.BlueCards = map[string]string{"5": "red"}
-	err = web.commitMatchScore(match, matchResult, true)
-	assert.Nil(t, err)
-	team, _ = web.arena.Database.GetTeamById(5)
-	assert.True(t, team.YellowCard)
-
-	// Check that a red card in eliminations zeroes out the score.
-	tournament.CreateTestAlliances(web.arena.Database, 2)
-	match.Type = "elimination"
-	match.ElimRedAlliance = 1
-	match.ElimBlueAlliance = 2
-	web.arena.Database.SaveMatch(match)
-	matchResult = model.BuildTestMatchResult(match.Id, 10)
-	matchResult.MatchType = match.Type
-	matchResult.RedCards = map[string]string{"1": "red"}
-	err = web.commitMatchScore(match, matchResult, true)
-	assert.Nil(t, err)
-	assert.Equal(t, 0, matchResult.RedScoreSummary(true).Score)
-	assert.NotEqual(t, 0, matchResult.BlueScoreSummary(true).Score)
 }
 
 func TestMatchPlayWebsocketCommands(t *testing.T) {
@@ -255,7 +204,6 @@ func TestMatchPlayWebsocketCommands(t *testing.T) {
 	readWebsocketType(t, ws, "arenaStatus")
 	readWebsocketType(t, ws, "matchTime")
 	readWebsocketType(t, ws, "realtimeScore")
-	readWebsocketType(t, ws, "scoringStatus")
 	readWebsocketType(t, ws, "audienceDisplayMode")
 	readWebsocketType(t, ws, "allianceStationDisplayMode")
 	readWebsocketType(t, ws, "eventStatus")
@@ -310,12 +258,12 @@ func TestMatchPlayWebsocketCommands(t *testing.T) {
 	readWebsocketType(t, ws, "audienceDisplayMode")
 	readWebsocketType(t, ws, "allianceStationDisplayMode")
 	assert.Equal(t, field.PostMatch, web.arena.MatchState)
-	web.arena.RedRealtimeScore.CurrentScore.TeleopCellsOuter = [4]int{1, 1, 1, 4}
-	web.arena.BlueRealtimeScore.CurrentScore.ExitedInitiationLine = [3]bool{true, false, true}
+	web.arena.RedScore.TeleopPoints = 30
+	web.arena.BlueScore.EndgamePoints = 45
 	ws.Write("commitResults", nil)
 	readWebsocketMultiple(t, ws, 3) // reload, realtimeScore, setAllianceStationDisplay
-	assert.Equal(t, [4]int{1, 1, 1, 4}, web.arena.SavedMatchResult.RedScore.TeleopCellsOuter)
-	assert.Equal(t, [3]bool{true, false, true}, web.arena.SavedMatchResult.BlueScore.ExitedInitiationLine)
+	assert.Equal(t, 30, web.arena.SavedMatchResult.RedScore.TeleopPoints)
+	assert.Equal(t, 45, web.arena.SavedMatchResult.BlueScore.EndgamePoints)
 	assert.Equal(t, field.PreMatch, web.arena.MatchState)
 	ws.Write("discardResults", nil)
 	readWebsocketMultiple(t, ws, 3) // reload, realtimeScore, setAllianceStationDisplay
@@ -347,7 +295,6 @@ func TestMatchPlayWebsocketNotifications(t *testing.T) {
 	readWebsocketType(t, ws, "arenaStatus")
 	readWebsocketType(t, ws, "matchTime")
 	readWebsocketType(t, ws, "realtimeScore")
-	readWebsocketType(t, ws, "scoringStatus")
 	readWebsocketType(t, ws, "audienceDisplayMode")
 	readWebsocketType(t, ws, "allianceStationDisplayMode")
 	readWebsocketType(t, ws, "eventStatus")
@@ -376,8 +323,6 @@ func TestMatchPlayWebsocketNotifications(t *testing.T) {
 	assert.Equal(t, true, statusReceived)
 	assert.Equal(t, field.AutoPeriod, matchTime.MatchState)
 	assert.Equal(t, 3, matchTime.MatchTimeSec)
-	web.arena.ScoringStatusNotifier.Notify()
-	readWebsocketType(t, ws, "scoringStatus")
 
 	// Should get a tick notification when an integer second threshold is crossed.
 	web.arena.MatchStartTime = time.Now().Add(-time.Second - 10*time.Millisecond) // Crossed

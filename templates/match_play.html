@@ -115,9 +115,43 @@
       <div class="col-lg-12 well">
         <div class="col-lg-3">
           <p>Scoring</p>
-          <p><span class="label label-scoring" id="refereeScoreStatus">Referee</span><br />
-            <span class="label label-scoring" id="redScoreStatus"></span><br />
-            <span class="label label-scoring" id="blueScoreStatus"></span></p>
+          <div class="row">
+            <div class="col-lg-6">Blue</div>
+            <div class="col-lg-6">Red</div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">Auto</div>
+          </div>
+          <div class="row">
+            <div class="col-lg-6">
+              <input id="blueAutoScore" class="form-control input-sm" value="{{.BlueScore.AutoPoints}}" disabled onblur="updateRealtimeScore();"/>
+            </div>
+            <div class="col-lg-6">
+              <input id="redAutoScore" class="form-control input-sm" value="{{.RedScore.AutoPoints}}" disabled onblur="updateRealtimeScore();"/>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">Teleop</div>
+          </div>
+          <div class="row">
+            <div class="col-lg-6">
+              <input id="blueTeleopScore" class="form-control input-sm" value="{{.BlueScore.TeleopPoints}}" disabled onblur="updateRealtimeScore();"/>
+            </div>
+            <div class="col-lg-6">
+              <input id="redTeleopScore" class="form-control input-sm" value="{{.RedScore.TeleopPoints}}" disabled onblur="updateRealtimeScore();"/>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">Endgame</div>
+          </div>
+          <div class="row">
+            <div class="col-lg-6">
+              <input id="blueEndgameScore" class="form-control input-sm" value="{{.BlueScore.EndgamePoints}}" disabled onblur="updateRealtimeScore();"/>
+            </div>
+            <div class="col-lg-6">
+              <input id="redEndgameScore" class="form-control input-sm" value="{{.RedScore.EndgamePoints}}" disabled onblur="updateRealtimeScore();"/>
+            </div>
+          </div>
         {{if .PlcIsEnabled}}
           <p>PLC Status</p>
           <p>
@@ -237,8 +271,6 @@
       <div class="modal-body">
         <p id="confirmCommitReplay">This is a replay of Match {{.Match.DisplayName}}. Are you sure you want to
             overwrite the previous results?</p>
-        <p id="confirmCommitNotReady">Not all scoring sources are ready yet. Are you sure you want to
-            commit the results?</p>
       </div>
       <div class="modal-footer">
         <form class="form-horizontal" action="/setup/teams/clear" method="POST">

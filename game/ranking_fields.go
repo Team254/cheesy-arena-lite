@@ -16,7 +16,6 @@ type RankingFields struct {
 	Wins              int
 	Losses            int
 	Ties              int
-	Disqualifications int
 	Played            int
 }
 
@@ -29,17 +28,11 @@ type Ranking struct {
 
 type Rankings []Ranking
 
-func (fields *RankingFields) AddScoreSummary(ownScore *ScoreSummary, opponentScore *ScoreSummary, disqualified bool) {
+func (fields *RankingFields) AddScoreSummary(ownScore *ScoreSummary, opponentScore *ScoreSummary) {
 	fields.Played += 1
 
 	// Store a random value to be used as the last tiebreaker if necessary.
 	fields.Random = rand.Float64()
-
-	if disqualified {
-		// Don't award any points.
-		fields.Disqualifications += 1
-		return
-	}
 
 	// Assign ranking points and wins/losses/ties.
 	if ownScore.Score > opponentScore.Score {
@@ -51,17 +44,11 @@ func (fields *RankingFields) AddScoreSummary(ownScore *ScoreSummary, opponentSco
 	} else {
 		fields.Losses += 1
 	}
-	if ownScore.ControlPanelRankingPoint {
-		fields.RankingPoints += 1
-	}
-	if ownScore.EndgameRankingPoint {
-		fields.RankingPoints += 1
-	}
 
 	// Assign tiebreaker points.
 	fields.AutoPoints += ownScore.AutoPoints
 	fields.EndgamePoints += ownScore.EndgamePoints
-	fields.TeleopPoints += ownScore.TeleopPowerCellPoints + ownScore.ControlPanelPoints
+	fields.TeleopPoints += ownScore.TeleopPoints
 }
 
 // Helper function to implement the required interface for Sort.

@@ -7,7 +7,6 @@ package plc
 
 import (
 	"fmt"
-	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/websocket"
 	"github.com/goburrow/modbus"
 	"log"
@@ -54,10 +53,6 @@ const (
 	blueConnected1
 	blueConnected2
 	blueConnected3
-	redRungIsLevel
-	blueRungIsLevel
-	redPowerPortJam
-	bluePowerPortJam
 	inputCount
 )
 
@@ -66,26 +61,6 @@ type register int
 
 const (
 	fieldIoConnection register = iota
-	redPowerPortBottom
-	redPowerPortOuter
-	redPowerPortInner
-	bluePowerPortBottom
-	bluePowerPortOuter
-	bluePowerPortInner
-	redControlPanelRed
-	redControlPanelGreen
-	redControlPanelBlue
-	redControlPanelIntensity
-	blueControlPanelRed
-	blueControlPanelGreen
-	blueControlPanelBlue
-	blueControlPanelIntensity
-	redControlPanelColor
-	blueControlPanelColor
-	redControlPanelLastColor
-	blueControlPanelLastColor
-	redControlPanelSegments
-	blueControlPanelSegments
 	registerCount
 )
 
@@ -101,17 +76,6 @@ const (
 	stackLightBlue
 	stackLightBuzzer
 	fieldResetLight
-	powerPortMotors
-	redStage1Light
-	redStage2Light
-	redStage3Light
-	blueStage1Light
-	blueStage2Light
-	blueStage3Light
-	redTrussLight
-	blueTrussLight
-	redControlPanelLight
-	blueControlPanelLight
 	coilCount
 )
 
@@ -121,8 +85,6 @@ type armorBlock int
 const (
 	redDs armorBlock = iota
 	blueDs
-	shieldGenerator
-	controlPanel
 	armorBlockCount
 )
 
@@ -231,36 +193,6 @@ func (plc *Plc) GetEthernetConnected() ([3]bool, [3]bool) {
 		}
 }
 
-// Returns the total number of power cells scored since match start in each level of the red and blue power ports.
-func (plc *Plc) GetPowerPorts() ([3]int, [3]int) {
-	return [3]int{
-			int(plc.registers[redPowerPortBottom]),
-			int(plc.registers[redPowerPortOuter]),
-			int(plc.registers[redPowerPortInner]),
-		},
-		[3]int{
-			int(plc.registers[bluePowerPortBottom]),
-			int(plc.registers[bluePowerPortOuter]),
-			int(plc.registers[bluePowerPortInner]),
-		}
-}
-
-// Returns whether each of the red and blue power ports are jammed.
-func (plc *Plc) GetPowerPortJams() (bool, bool) {
-	return plc.inputs[redPowerPortJam], plc.inputs[bluePowerPortJam]
-}
-
-// Returns the current color and number of segment transitions for each of the red and blue control panels.
-func (plc *Plc) GetControlPanels() (game.ControlPanelColor, int, game.ControlPanelColor, int) {
-	return game.ControlPanelColor(plc.registers[redControlPanelColor]), int(plc.registers[redControlPanelSegments]),
-		game.ControlPanelColor(plc.registers[blueControlPanelColor]), int(plc.registers[blueControlPanelSegments])
-}
-
-// Returns whether each of the red and blue rungs is level.
-func (plc *Plc) GetRungs() (bool, bool) {
-	return plc.inputs[redRungIsLevel], plc.inputs[blueRungIsLevel]
-}
-
 // Sets the on/off state of the stack lights on the scoring table.
 func (plc *Plc) SetStackLights(red, blue, orange, green bool) {
 	plc.coils[stackLightRed] = red
@@ -277,33 +209,6 @@ func (plc *Plc) SetStackBuzzer(state bool) {
 // Sets the on/off state of the field reset light.
 func (plc *Plc) SetFieldResetLight(state bool) {
 	plc.coils[fieldResetLight] = state
-}
-
-// Sets the on/off state of the agitator motors within each power port.
-func (plc *Plc) SetPowerPortMotors(state bool) {
-	plc.coils[powerPortMotors] = state
-}
-
-// Sets the on/off state of the lights mounted within the shield generator trussing.
-func (plc *Plc) SetStageActivatedLights(red, blue [3]bool) {
-	plc.coils[redStage1Light] = red[0]
-	plc.coils[redStage2Light] = red[1]
-	plc.coils[redStage3Light] = red[2]
-	plc.coils[blueStage1Light] = blue[0]
-	plc.coils[blueStage2Light] = blue[1]
-	plc.coils[blueStage3Light] = blue[2]
-}
-
-// Sets the on/off state of the red and blue alliance stack lights mounted to the control panel.
-func (plc *Plc) SetControlPanelLights(red, blue bool) {
-	plc.coils[redControlPanelLight] = red
-	plc.coils[blueControlPanelLight] = blue
-}
-
-// Sets the on/off state of the red and blue alliance stack lights mounted to the top of the shield generator.
-func (plc *Plc) SetShieldGeneratorLights(red, blue bool) {
-	plc.coils[redTrussLight] = red
-	plc.coils[blueTrussLight] = blue
 }
 
 func (plc *Plc) GetCycleState(max, index, duration int) bool {

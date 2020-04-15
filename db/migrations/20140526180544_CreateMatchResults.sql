@@ -5,9 +5,7 @@ CREATE TABLE match_results (
   playnumber int,
   matchtype VARCHAR(16),
   redscorejson text,
-  bluescorejson text,
-  redcardsjson text,
-  bluecardsjson text
+  bluescorejson text
 );
 CREATE UNIQUE INDEX matchid_playnumber ON match_results(matchid, playnumber);
 

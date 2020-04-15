@@ -11,7 +11,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
 	"io/ioutil"
 	"net/http"
@@ -37,7 +36,6 @@ type TbaMatch struct {
 	SetNumber      int                           `json:"set_number"`
 	MatchNumber    int                           `json:"match_number"`
 	Alliances      map[string]*TbaAlliance       `json:"alliances"`
-	ScoreBreakdown map[string]*TbaScoreBreakdown `json:"score_breakdown"`
 	TimeString     string                        `json:"time_string"`
 	TimeUtc        string                        `json:"time_utc"`
 }
@@ -47,40 +45,6 @@ type TbaAlliance struct {
 	Surrogates []string `json:"surrogates"`
 	Dqs        []string `json:"dqs"`
 	Score      *int     `json:"score"`
-}
-
-type TbaScoreBreakdown struct {
-	InitLineRobot1                string `json:"initLineRobot1"`
-	InitLineRobot2                string `json:"initLineRobot2"`
-	InitLineRobot3                string `json:"initLineRobot3"`
-	AutoCellsBottom               int    `json:"autoCellsBottom"`
-	AutoCellsOuter                int    `json:"autoCellsOuter"`
-	AutoCellsInner                int    `json:"autoCellsInner"`
-	TeleopCellsBottom             int    `json:"teleopCellsBottom"`
-	TeleopCellsOuter              int    `json:"teleopCellsOuter"`
-	TeleopCellsInner              int    `json:"teleopCellsInner"`
-	Stage1Activated               bool   `json:"stage1Activated"`
-	Stage2Activated               bool   `json:"stage2Activated"`
-	Stage3Activated               bool   `json:"stage3Activated"`
-	Stage3TargetColor             string `json:"stage3TargetColor"`
-	EndgameRobot1                 string `json:"endgameRobot1"`
-	EndgameRobot2                 string `json:"endgameRobot2"`
-	EndgameRobot3                 string `json:"endgameRobot3"`
-	EndgameRungIsLevel            string `json:"endgameRungIsLevel"`
-	FoulCount                     int    `json:"foulCount"`
-	TechFoulCount                 int    `json:"techFoulCount"`
-	AutoInitLinePoints            int    `json:"autoInitLinePoints"`
-	AutoCellPoints                int    `json:"autoCellPoints"`
-	AutoPoints                    int    `json:"autoPoints"`
-	TeleopCellPoints              int    `json:"teleopCellPoints"`
-	ControlPanelPoints            int    `json:"controlPanelPoints"`
-	EndgamePoints                 int    `json:"endgamePoints"`
-	TeleopPoints                  int    `json:"teleopPoints"`
-	FoulPoints                    int    `json:"foulPoints"`
-	TotalPoints                   int    `json:"totalPoints"`
-	ShieldEnergizedRankingPoint   bool   `json:"shieldEnergizedRankingPoint"`
-	ShieldOperationalRankingPoint bool   `json:"shieldOperationalRankingPoint"`
-	RP                            int    `json:"rp"`
 }
 
 type TbaRanking struct {
@@ -136,12 +100,6 @@ type TbaPublishedAward struct {
 	TeamKey string `json:"team_key"`
 	Awardee string `json:"awardee"`
 }
-
-var exitedInitLineMapping = map[bool]string{false: "None", true: "Exited"}
-var controlPanelColorMapping = map[game.ControlPanelColor]string{game.ColorUnknown: "Unknown", game.ColorRed: "Red",
-	game.ColorGreen: "Green", game.ColorBlue: "Blue", game.ColorYellow: "Yellow"}
-var endgameMapping = []string{"None", "Park", "Hang"}
-var rungIsLevelMapping = map[bool]string{false: "NotLevel", true: "IsLevel"}
 
 func NewTbaClient(eventCode, secretId, secret string) *TbaClient {
 	return &TbaClient{BaseUrl: tbaBaseUrl, eventCode: eventCode, secretId: secretId, secret: secret,
@@ -316,31 +274,31 @@ func (client *TbaClient) PublishMatches(database *model.Database) error {
 		matchNumber, _ := strconv.Atoi(match.DisplayName)
 
 		// Fill in scores if the match has been played.
-		var scoreBreakdown map[string]*TbaScoreBreakdown
+		var redScoreSummary, blueScoreSummary int
 		var redScore, blueScore *int
-		var redCards, blueCards map[string]string
 		if match.IsComplete() {
 			matchResult, err := database.GetMatchResultForMatch(match.Id)
 			if err != nil {
 				return err
 			}
 			if matchResult != nil {
-				scoreBreakdown = make(map[string]*TbaScoreBreakdown)
-				scoreBreakdown["red"] = createTbaScoringBreakdown(&match, matchResult, "red")
-				scoreBreakdown["blue"] = createTbaScoringBreakdown(&match, matchResult, "blue")
-				redScore = &scoreBreakdown["red"].TotalPoints
-				blueScore = &scoreBreakdown["blue"].TotalPoints
-				redCards = matchResult.RedCards
-				blueCards = matchResult.BlueCards
+				redScoreSummary = matchResult.RedScore.AutoPoints +
+					matchResult.RedScore.TeleopPoints +
+					matchResult.RedScore.EndgamePoints
+				blueScoreSummary = matchResult.BlueScore.AutoPoints +
+					matchResult.BlueScore.TeleopPoints +
+					matchResult.BlueScore.EndgamePoints
+				redScore = &redScoreSummary
+				blueScore = &blueScoreSummary
 			}
 		}
 		alliances := make(map[string]*TbaAlliance)
 		alliances["red"] = createTbaAlliance([3]int{match.Red1, match.Red2, match.Red3}, [3]bool{match.Red1IsSurrogate,
-			match.Red2IsSurrogate, match.Red3IsSurrogate}, redScore, redCards)
+			match.Red2IsSurrogate, match.Red3IsSurrogate}, redScore)
 		alliances["blue"] = createTbaAlliance([3]int{match.Blue1, match.Blue2, match.Blue3},
-			[3]bool{match.Blue1IsSurrogate, match.Blue2IsSurrogate, match.Blue3IsSurrogate}, blueScore, blueCards)
+			[3]bool{match.Blue1IsSurrogate, match.Blue2IsSurrogate, match.Blue3IsSurrogate}, blueScore)
 
-		tbaMatches[i] = TbaMatch{"qm", 0, matchNumber, alliances, scoreBreakdown, match.Time.Local().Format("3:04 PM"),
+		tbaMatches[i] = TbaMatch{"qm", 0, matchNumber, alliances, match.Time.Local().Format("3:04 PM"),
 			match.Time.UTC().Format("2006-01-02T15:04:05")}
 		if match.Type == "elimination" {
 			tbaMatches[i].CompLevel = map[int]string{1: "f", 2: "sf", 4: "qf", 8: "ef"}[match.ElimRound]
@@ -379,7 +337,7 @@ func (client *TbaClient) PublishRankings(database *model.Database) error {
 		tbaRankings[i] = TbaRanking{getTbaTeam(ranking.TeamId), ranking.Rank,
 			float32(ranking.RankingPoints) / float32(ranking.Played), ranking.AutoPoints, ranking.EndgamePoints,
 			ranking.TeleopPoints,
-			fmt.Sprintf("%d-%d-%d", ranking.Wins, ranking.Losses, ranking.Ties), ranking.Disqualifications,
+			fmt.Sprintf("%d-%d-%d", ranking.Wins, ranking.Losses, ranking.Ties), 0,
 			ranking.Played}
 	}
 	jsonBody, err := json.Marshal(TbaRankings{breakdowns, tbaRankings})
@@ -501,7 +459,7 @@ func (client *TbaClient) postRequest(resource string, action string, body []byte
 	return httpClient.Do(request)
 }
 
-func createTbaAlliance(teamIds [3]int, surrogates [3]bool, score *int, cards map[string]string) *TbaAlliance {
+func createTbaAlliance(teamIds [3]int, surrogates [3]bool, score *int) *TbaAlliance {
 	alliance := TbaAlliance{Surrogates: []string{}, Dqs: []string{}, Score: score}
 	for i, teamId := range teamIds {
 		teamKey := getTbaTeam(teamId)
@@ -509,77 +467,9 @@ func createTbaAlliance(teamIds [3]int, surrogates [3]bool, score *int, cards map
 		if surrogates[i] {
 			alliance.Surrogates = append(alliance.Surrogates, teamKey)
 		}
-		if cards != nil {
-			if card, ok := cards[strconv.Itoa(teamId)]; ok && card == "red" {
-				alliance.Dqs = append(alliance.Dqs, teamKey)
-			}
-		}
 	}
 
 	return &alliance
-}
-
-func createTbaScoringBreakdown(match *model.Match, matchResult *model.MatchResult, alliance string) *TbaScoreBreakdown {
-	var breakdown TbaScoreBreakdown
-	var score *game.Score
-	var scoreSummary, opponentScoreSummary *game.ScoreSummary
-	if alliance == "red" {
-		score = matchResult.RedScore
-		scoreSummary = matchResult.RedScoreSummary(true)
-		opponentScoreSummary = matchResult.BlueScoreSummary(true)
-	} else {
-		score = matchResult.BlueScore
-		scoreSummary = matchResult.BlueScoreSummary(true)
-		opponentScoreSummary = matchResult.RedScoreSummary(true)
-	}
-
-	breakdown.InitLineRobot1 = exitedInitLineMapping[score.ExitedInitiationLine[0]]
-	breakdown.InitLineRobot2 = exitedInitLineMapping[score.ExitedInitiationLine[1]]
-	breakdown.InitLineRobot3 = exitedInitLineMapping[score.ExitedInitiationLine[2]]
-	breakdown.AutoCellsBottom = sumPowerCells(score.AutoCellsBottom[:])
-	breakdown.AutoCellsOuter = sumPowerCells(score.AutoCellsOuter[:])
-	breakdown.AutoCellsInner = sumPowerCells(score.AutoCellsInner[:])
-	breakdown.TeleopCellsBottom = sumPowerCells(score.TeleopCellsBottom[:])
-	breakdown.TeleopCellsOuter = sumPowerCells(score.TeleopCellsOuter[:])
-	breakdown.TeleopCellsInner = sumPowerCells(score.TeleopCellsInner[:])
-	breakdown.Stage1Activated = scoreSummary.StagesActivated[0]
-	breakdown.Stage2Activated = scoreSummary.StagesActivated[1]
-	breakdown.Stage3Activated = scoreSummary.StagesActivated[2]
-	breakdown.Stage3TargetColor = controlPanelColorMapping[score.PositionControlTargetColor]
-	breakdown.EndgameRobot1 = endgameMapping[score.EndgameStatuses[0]]
-	breakdown.EndgameRobot2 = endgameMapping[score.EndgameStatuses[1]]
-	breakdown.EndgameRobot3 = endgameMapping[score.EndgameStatuses[2]]
-	breakdown.EndgameRungIsLevel = rungIsLevelMapping[score.RungIsLevel]
-	for _, foul := range score.Fouls {
-		if foul.Rule() != nil && !foul.Rule().IsRankingPoint {
-			if foul.Rule().IsTechnical {
-				breakdown.TechFoulCount++
-			} else {
-				breakdown.FoulCount++
-			}
-		}
-	}
-	breakdown.AutoInitLinePoints = scoreSummary.InitiationLinePoints
-	breakdown.AutoCellPoints = scoreSummary.AutoPowerCellPoints
-	breakdown.AutoPoints = scoreSummary.AutoPoints
-	breakdown.TeleopCellPoints = scoreSummary.TeleopPowerCellPoints
-	breakdown.ControlPanelPoints = scoreSummary.ControlPanelPoints
-	breakdown.EndgamePoints = scoreSummary.EndgamePoints
-	breakdown.TeleopPoints = scoreSummary.TeleopPowerCellPoints + scoreSummary.ControlPanelPoints +
-		scoreSummary.EndgamePoints
-	breakdown.FoulPoints = scoreSummary.FoulPoints
-	breakdown.TotalPoints = scoreSummary.Score
-	breakdown.ShieldEnergizedRankingPoint = scoreSummary.ControlPanelRankingPoint
-	breakdown.ShieldOperationalRankingPoint = scoreSummary.EndgameRankingPoint
-
-	if match.ShouldUpdateRankings() {
-		// Calculate and set the ranking points for the match.
-		var ranking game.Ranking
-		ranking.AddScoreSummary(scoreSummary, opponentScoreSummary, false)
-		breakdown.RP = ranking.RankingPoints
-	}
-
-	return &breakdown
 }
 
 // Uploads the awards to The Blue Alliance.

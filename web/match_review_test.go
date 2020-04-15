@@ -49,8 +49,8 @@ func TestMatchReviewEditExistingResult(t *testing.T) {
 	recorder := web.getHttpResponse("/match_review")
 	assert.Equal(t, 200, recorder.Code)
 	assert.Contains(t, recorder.Body.String(), ">QF4-3<")
-	assert.Contains(t, recorder.Body.String(), ">217<") // The red score
-	assert.Contains(t, recorder.Body.String(), ">252<") // The blue score
+	assert.Contains(t, recorder.Body.String(), ">155<") // The red score
+	assert.Contains(t, recorder.Body.String(), ">80<") // The blue score
 
 	// Check response for non-existent match.
 	recorder = web.getHttpResponse(fmt.Sprintf("/match_review/%d/edit", 12345))
@@ -62,8 +62,8 @@ func TestMatchReviewEditExistingResult(t *testing.T) {
 	assert.Contains(t, recorder.Body.String(), " QF4-3 ")
 
 	// Update the score to something else.
-	postBody := "redScoreJson={\"EndgameStatuses\":[0,2,1]}&blueScoreJson={\"AutoCellsOuter\":[3, 4]," +
-		"\"Fouls\":[{\"TeamId\":973,\"RuleId\":1}]}&redCardsJson={\"105\":\"yellow\"}&blueCardsJson={}"
+	postBody := "redScoreJson={\"AutoPoints\":45,\"TeleopPoints\":80,\"EndgamePoints\":10}" +
+		"&blueScoreJson={\"AutoPoints\":15,\"TeleopPoints\":60,\"EndgamePoints\":50}"
 	recorder = web.postHttpResponse(fmt.Sprintf("/match_review/%d/edit", match.Id), postBody)
 	assert.Equal(t, 303, recorder.Code)
 
@@ -71,8 +71,8 @@ func TestMatchReviewEditExistingResult(t *testing.T) {
 	recorder = web.getHttpResponse("/match_review")
 	assert.Equal(t, 200, recorder.Code)
 	assert.Contains(t, recorder.Body.String(), ">QF4-3<")
-	assert.Contains(t, recorder.Body.String(), ">33<") // The red score
-	assert.Contains(t, recorder.Body.String(), ">28<") // The blue score
+	assert.Contains(t, recorder.Body.String(), ">135<") // The red score
+	assert.Contains(t, recorder.Body.String(), ">125<") // The blue score
 }
 
 func TestMatchReviewCreateNewResult(t *testing.T) {
@@ -94,8 +94,8 @@ func TestMatchReviewCreateNewResult(t *testing.T) {
 	assert.Contains(t, recorder.Body.String(), " QF4-3 ")
 
 	// Update the score to something else.
-	postBody := "redScoreJson={\"TeleopCellsBottom\":[5,1,7,2]}&blueScoreJson={\"TeleopCellsInner\":[2,2,2,2]," +
-		"\"Fouls\":[{\"TeamId\":973,\"RuleId\":1}]}&redCardsJson={\"105\":\"yellow\"}&blueCardsJson={}"
+	postBody := "redScoreJson={\"AutoPoints\":10,\"TeleopPoints\":20,\"EndgamePoints\":30}" +
+		"&blueScoreJson={\"AutoPoints\":40,\"TeleopPoints\":50,\"EndgamePoints\":60}"
 	recorder = web.postHttpResponse(fmt.Sprintf("/match_review/%d/edit", match.Id), postBody)
 	assert.Equal(t, 303, recorder.Code)
 
@@ -103,6 +103,6 @@ func TestMatchReviewCreateNewResult(t *testing.T) {
 	recorder = web.getHttpResponse("/match_review")
 	assert.Equal(t, 200, recorder.Code)
 	assert.Contains(t, recorder.Body.String(), ">QF4-3<")
-	assert.Contains(t, recorder.Body.String(), ">18<") // The red score
-	assert.Contains(t, recorder.Body.String(), ">24<") // The blue score
+	assert.Contains(t, recorder.Body.String(), ">60<") // The red score
+	assert.Contains(t, recorder.Body.String(), ">150<") // The blue score
 }

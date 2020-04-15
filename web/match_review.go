@@ -7,7 +7,6 @@ package web
 
 import (
 	"fmt"
-	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -92,8 +91,7 @@ func (web *Web) matchReviewEditGetHandler(w http.ResponseWriter, r *http.Request
 		*model.EventSettings
 		Match           *model.Match
 		MatchResultJson *model.MatchResultDb
-		Rules           map[int]*game.Rule
-	}{web.arena.EventSettings, match, matchResultJson, game.GetAllRules()}
+	}{web.arena.EventSettings, match, matchResultJson}
 	err = template.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		handleWebErr(w, err)
@@ -115,8 +113,7 @@ func (web *Web) matchReviewEditPostHandler(w http.ResponseWriter, r *http.Reques
 
 	matchResultJson := model.MatchResultDb{Id: matchResult.Id, MatchId: match.Id, PlayNumber: matchResult.PlayNumber,
 		MatchType: matchResult.MatchType, RedScoreJson: r.PostFormValue("redScoreJson"),
-		BlueScoreJson: r.PostFormValue("blueScoreJson"), RedCardsJson: r.PostFormValue("redCardsJson"),
-		BlueCardsJson: r.PostFormValue("blueCardsJson")}
+		BlueScoreJson: r.PostFormValue("blueScoreJson")}
 
 	// Deserialize the JSON using the same mechanism as to store scoring information in the database.
 	matchResult, err = matchResultJson.Deserialize()
@@ -127,10 +124,8 @@ func (web *Web) matchReviewEditPostHandler(w http.ResponseWriter, r *http.Reques
 
 	if isCurrent {
 		// If editing the current match, just save it back to memory.
-		web.arena.RedRealtimeScore.CurrentScore = *matchResult.RedScore
-		web.arena.BlueRealtimeScore.CurrentScore = *matchResult.BlueScore
-		web.arena.RedRealtimeScore.Cards = matchResult.RedCards
-		web.arena.BlueRealtimeScore.Cards = matchResult.BlueCards
+		*web.arena.RedScore = *matchResult.RedScore
+		*web.arena.BlueScore = *matchResult.BlueScore
 
 		http.Redirect(w, r, "/match_play", 303)
 	} else {
@@ -193,8 +188,8 @@ func (web *Web) buildMatchReviewList(matchType string) ([]MatchReviewListItem, e
 			return []MatchReviewListItem{}, err
 		}
 		if matchResult != nil {
-			matchReviewList[i].RedScore = matchResult.RedScoreSummary(true).Score
-			matchReviewList[i].BlueScore = matchResult.BlueScoreSummary(true).Score
+			matchReviewList[i].RedScore = matchResult.RedScoreSummary().Score
+			matchReviewList[i].BlueScore = matchResult.BlueScoreSummary().Score
 		}
 		switch match.Status {
 		case model.RedWonMatch:

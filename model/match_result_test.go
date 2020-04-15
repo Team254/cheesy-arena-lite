@@ -4,7 +4,6 @@
 package model
 
 import (
-	"github.com/Team254/cheesy-arena/game"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -26,7 +25,6 @@ func TestMatchResultCrud(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, matchResult, matchResult2)
 
-	matchResult.BlueScore.EndgameStatuses = [3]game.EndgameStatus{game.EndgameHang, game.EndgameNone, game.EndgamePark}
 	db.SaveMatchResult(matchResult)
 	matchResult2, err = db.GetMatchResultForMatch(254)
 	assert.Nil(t, err)

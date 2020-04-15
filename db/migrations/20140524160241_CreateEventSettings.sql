@@ -30,10 +30,7 @@ CREATE TABLE event_settings (
   autodurationsec int,
   pausedurationsec int,
   teleopdurationsec int,
-  warningremainingdurationsec int,
-  stage1capacity int,
-  stage2capacity int,
-  stage3capacity int
+  warningremainingdurationsec int
 );
 
 -- +goose Down

@@ -7,12 +7,6 @@ package game
 
 import "time"
 
-const (
-	powerPortAutoGracePeriodSec   = 5
-	PowerPortTeleopGracePeriodSec = 5
-	rungAssessmentDelaySec        = 5
-)
-
 var MatchTiming = struct {
 	WarmupDurationSec           int
 	AutoDurationSec             int
@@ -39,10 +33,4 @@ func GetDurationToWarning() time.Duration {
 func GetDurationToTeleopEnd() time.Duration {
 	return time.Duration(MatchTiming.WarmupDurationSec+MatchTiming.AutoDurationSec+MatchTiming.PauseDurationSec+
 		MatchTiming.TeleopDurationSec) * time.Second
-}
-
-// Returns true if the given time is within the proper range for assessing the level state of the shield generator rung.
-func ShouldAssessRung(matchStartTime, currentTime time.Time) bool {
-	return currentTime.After(matchStartTime.Add(GetDurationToWarning())) &&
-		currentTime.Before(matchStartTime.Add(GetDurationToTeleopEnd()+rungAssessmentDelaySec*time.Second))
 }

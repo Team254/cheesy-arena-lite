@@ -194,13 +194,6 @@ func (web *Web) allianceSelectionFinalizeHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// Reset yellow cards.
-	err = tournament.CalculateTeamCards(web.arena.Database, "elimination")
-	if err != nil {
-		handleWebErr(w, err)
-		return
-	}
-
 	// Back up the database.
 	err = web.arena.Database.Backup(web.arena.EventSettings.Name, "post_alliance_selection")
 	if err != nil {

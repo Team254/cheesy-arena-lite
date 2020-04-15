@@ -25,150 +25,18 @@
 </div>
 <div id="scoreTemplate" style="display: none;">
   <div class="well well-{{"{{alliance}}"}}">
-    <fieldset>
-      <legend>Autonomous</legend>
-      <b>Exited Initiation Line</b>
-      <div class="form-group">
-        <div class="row">
-          {{range $i := seq 3}}
-            <div class="col-lg-4">
-              <label class="col-lg-8 control-label">Team {{"{{team"}}{{$i}}{{"}}"}}</label>
-              <input type="checkbox" class="input-sm" name="{{"{{alliance}}"}}ExitedInitiationLine{{$i}}">
-            </div>
-          {{end}}
-        </div>
-      </div>
-      <b>Power Cells</b>
-      {{template "powerCells" dict "period" "Auto" "stages" 2}}
-    </fieldset>
-    <fieldset>
-      <legend>Teleoperated</legend>
-      <b>Power Cells</b>
-      {{template "powerCells" dict "period" "Teleop" "stages" 4}}
-      <b>Control Panel</b>
-      <div class="form-group">
-        <div class="row">
-          <div class="radio col-lg-3 col-lg-offset-1">
-            <input type="radio" name="{{"{{alliance}}"}}ControlPanelStatus" value="0">None
-          </div>
-          <div class="radio col-lg-4">
-            <input type="radio" name="{{"{{alliance}}"}}ControlPanelStatus" value="1">Rotation Control
-          </div>
-          <div class="radio col-lg-4">
-            <input type="radio" name="{{"{{alliance}}"}}ControlPanelStatus" value="2">Position Control
-          </div>
-        </div>
-      </div>
-    </fieldset>
-    <fieldset>
-      <legend>Endgame</legend>
-      <b>Robot Status</b>
-      <div class="form-group">
-        {{range $i := seq 3}}
-          <div class="row">
-            <label class="col-lg-2 col-lg-offset-1 control-label">Team {{"{{team"}}{{$i}}{{"}}"}}</label>
-            <div class="radio col-lg-2">
-              <input type="radio" name="{{"{{alliance}}"}}EndgameStatuses{{$i}}" value="0">None
-            </div>
-            <div class="radio col-lg-2">
-              <input type="radio" name="{{"{{alliance}}"}}EndgameStatuses{{$i}}" value="1">Park
-            </div>
-            <div class="radio col-lg-2">
-              <input type="radio" name="{{"{{alliance}}"}}EndgameStatuses{{$i}}" value="2">Hang
-            </div>
-          </div>
-        {{end}}
-        <div class="row">
-          <label class="col-lg-3 control-label">Rung Is Level</label>
-          <input type="checkbox" class="input-sm" name="{{"{{alliance}}"}}RungIsLevel">
-        </div>
-      </div>
-    </fieldset>
-    <fieldset>
-      <legend>Fouls</legend>
-      {{"{{#each score.Fouls}}"}}
-        <div class="well well-sm well-dark{{"{{../alliance}}"}}">
-          <button type="button" class="close" onclick="deleteFoul('{{"{{../alliance}}"}}', {{"{{@index}}"}});">
-            ×
-          </button>
-          <br />
-          <div class="form-group">
-            <label class="col-lg-4 control-label">Team</label>
-            <div class="col-lg-8">
-              <div class="radio col-lg-3">
-                <label>
-                  <input type="radio" name="{{"{{../alliance}}"}}Foul{{"{{@index}}"}}Team" value="{{"{{../team1}}"}}">
-                  {{"{{../team1}}"}}
-                 </label>
-              </div>
-              <div class="radio col-lg-3">
-                <label>
-                  <input type="radio" name="{{"{{../alliance}}"}}Foul{{"{{@index}}"}}Team" value="{{"{{../team2}}"}}">
-                  {{"{{../team2}}"}}
-                </label>
-              </div>
-              <div class="radio col-lg-3">
-                <label>
-                  <input type="radio" name="{{"{{../alliance}}"}}Foul{{"{{@index}}"}}Team" value="{{"{{../team3}}"}}">
-                  {{"{{../team3}}"}}
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-lg-4 control-label">Rule</label>
-            <div class="col-lg-7">
-              <select class="form-control" name="{{"{{../alliance}}"}}Foul{{"{{@index}}"}}RuleId">
-                {{range $rule := .Rules}}
-                  <option value="{{$rule.Id}}">{{$rule.RuleNumber}}
-                      [{{if $rule.IsRankingPoint}}Free RP{{else}}{{if $rule.IsTechnical}}Tech {{end}}Foul{{end}}]:
-                      {{$rule.Description}}
-                  </option>
-                {{end}}
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-lg-4 control-label">Seconds Into Match</label>
-            <div class="col-lg-3">
-              <input type="text" class="form-control input-sm" name="{{"{{../alliance}}"}}Foul{{"{{@index}}"}}Time">
-            </div>
-          </div>
-        </div>
-      {{"{{/each}}"}}
-      <button type="button" class="btn btn-default btn-sm" onclick="addFoul('{{"{{alliance}}"}}');">
-        Add Foul
-      </button>
-      <br /><br />
-    </fieldset>
-    <fieldset>
-      <legend>Cards</legend>
-      {{range $i := seq 3}}
-        <div class="form-group">
-          <label class="col-lg-4 control-label">Team {{"{{team"}}{{$i}}{{"}}"}}</label>
-          <div class="col-lg-8">
-            <div class="radio col-lg-3">
-              <label>
-                <input type="radio" name="{{"{{alliance}}"}}Team{{"{{team"}}{{$i}}{{"}}"}}Card" value="" checked>
-                None
-              </label>
-            </div>
-            <div class="radio col-lg-3">
-              <label>
-                <input type="radio" name="{{"{{alliance}}"}}Team{{"{{team"}}{{$i}}{{"}}"}}Card" value="yellow">
-                Yellow
-              </label>
-            </div>
-            <div class="radio col-lg-6">
-              <label>
-                <input type="radio" name="{{"{{alliance}}"}}Team{{"{{team"}}{{$i}}{{"}}"}}Card" value="red">
-                Red
-              </label>
-            </div>
-          </div>
-        </div>
-      {{end}}
-    </fieldset>
+    <div class="form-group">
+      <label>Autonomous</label>
+      <input name="{{"{{alliance}}"}}AutoPoints" class="form-control"/>
+    </div>
+    <div class="form-group">
+      <label>Teleoperated</label>
+      <input name="{{"{{alliance}}"}}TeleopPoints" class="form-control"/>
+    </div>
+    <div class="form-group">
+      <label>Endgame</label>
+      <input name="{{"{{alliance}}"}}EndgamePoints" class="form-control"/>
+    </div>
   </div>
 </div>
 {{end}}
@@ -178,35 +46,10 @@
   var matchId = {{.Match.Id}};
   var allianceResults = {};
   allianceResults["red"] = {alliance: "red", team1: {{.Match.Red1}}, team2: {{.Match.Red2}},
-      team3: {{.Match.Red3}}, score: jQuery.parseJSON('{{.MatchResultJson.RedScoreJson}}'),
-      cards: jQuery.parseJSON('{{.MatchResultJson.RedCardsJson}}')};
+      team3: {{.Match.Red3}}, score: jQuery.parseJSON('{{.MatchResultJson.RedScoreJson}}')};
   allianceResults["blue"] = {alliance: "blue", team1: {{.Match.Blue1}}, team2: {{.Match.Blue2}},
-      team3: {{.Match.Blue3}}, score: jQuery.parseJSON('{{.MatchResultJson.BlueScoreJson}}'),
-      cards: jQuery.parseJSON('{{.MatchResultJson.BlueCardsJson}}')};
+      team3: {{.Match.Blue3}}, score: jQuery.parseJSON('{{.MatchResultJson.BlueScoreJson}}')};
   renderResults("red");
   renderResults("blue");
 </script>
-{{end}}
-{{define "powerCells"}}
-  <div class="form-group">
-    <div class="row">
-      <label class="col-lg-2 col-lg-offset-3 text-center">Stage 1</label>
-      {{range $i := seq (add .stages -1)}}
-        <label class="col-lg-2 text-center">{{if lt $i 3}}Stage {{add $i 1}}{{else}}Extra{{end}}</label>
-      {{end}}
-    </div>
-    {{template "powerCellGoal" dict "period" .period "stages" .stages "goal" "Inner"}}
-    {{template "powerCellGoal" dict "period" .period "stages" .stages "goal" "Outer"}}
-    {{template "powerCellGoal" dict "period" .period "stages" .stages "goal" "Bottom"}}
-  </div>
-{{end}}
-{{define "powerCellGoal"}}
-  <div class="row">
-    <label class="col-lg-2 col-lg-offset-1">{{.goal}}</label>
-    {{range $i := seq .stages}}
-      <div class="col-lg-2">
-        <input type="text" class="form-control input-sm" name="{{"{{alliance}}"}}{{$.period}}Cells{{$.goal}}{{$i}}">
-      </div>
-    {{end}}
-  </div>
 {{end}}

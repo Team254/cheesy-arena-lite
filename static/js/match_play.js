@@ -5,7 +5,6 @@
 
 var websocket;
 var currentMatchId;
-var scoreIsReady;
 var lowBatteryThreshold = 8;
 
 // Sends a websocket message to load a team into an alliance station.
@@ -59,11 +58,22 @@ var startTimeout = function() {
   websocket.send("startTimeout", durationSec);
 };
 
+// Sends a websocket message to update the realtime score
+var updateRealtimeScore = function() {
+  websocket.send("updateRealtimeScore", {
+    blueAuto: parseInt($("#blueAutoScore").val()),
+    redAuto: parseInt($("#redAutoScore").val()),
+    blueTeleop: parseInt($("#blueTeleopScore").val()),
+    redTeleop: parseInt($("#redTeleopScore").val()),
+    blueEndgame: parseInt($("#blueEndgameScore").val()),
+    redEndgame: parseInt($("#redEndgameScore").val())
+  })
+};
+
 var confirmCommit = function(isReplay) {
-  if (isReplay || !scoreIsReady) {
+  if (isReplay) {
     // Show the appropriate message(s) in the confirmation dialog.
     $("#confirmCommitReplay").css("display", isReplay ? "block" : "none");
-    $("#confirmCommitNotReady").css("display", scoreIsReady ? "none" : "block");
     $("#confirmCommitResults").modal("show");
   } else {
     commitResults();
@@ -140,6 +150,18 @@ var handleArenaStatus = function(data) {
       $("#discardResults").prop("disabled", true);
       $("#editResults").prop("disabled", true);
       $("#startTimeout").prop("disabled", false);
+      $("#blueAutoScore").val("0");
+      $("#redAutoScore").val("0");
+      $("#blueTeleopScore").val("0");
+      $("#redTeleopScore").val("0");
+      $("#blueEndgameScore").val("0");
+      $("#redEndgameScore").val("0");
+      $("#blueAutoScore").prop("disabled", true);
+      $("#redAutoScore").prop("disabled", true);
+      $("#blueTeleopScore").prop("disabled", true);
+      $("#redTeleopScore").prop("disabled", true);
+      $("#blueEndgameScore").prop("disabled", true);
+      $("#redEndgameScore").prop("disabled", true);
       break;
     case "START_MATCH":
     case "WARMUP_PERIOD":
@@ -152,6 +174,12 @@ var handleArenaStatus = function(data) {
       $("#discardResults").prop("disabled", true);
       $("#editResults").prop("disabled", true);
       $("#startTimeout").prop("disabled", true);
+      $("#blueAutoScore").prop("disabled", false);
+      $("#redAutoScore").prop("disabled", false);
+      $("#blueTeleopScore").prop("disabled", false);
+      $("#redTeleopScore").prop("disabled", false);
+      $("#blueEndgameScore").prop("disabled", false);
+      $("#redEndgameScore").prop("disabled", false);
       break;
     case "POST_MATCH":
       $("#startMatch").prop("disabled", true);
@@ -160,6 +188,12 @@ var handleArenaStatus = function(data) {
       $("#discardResults").prop("disabled", false);
       $("#editResults").prop("disabled", false);
       $("#startTimeout").prop("disabled", true);
+      $("#blueAutoScore").prop("disabled", false);
+      $("#redAutoScore").prop("disabled", false);
+      $("#blueTeleopScore").prop("disabled", false);
+      $("#redTeleopScore").prop("disabled", false);
+      $("#blueEndgameScore").prop("disabled", false);
+      $("#redEndgameScore").prop("disabled", false);
       break;
     case "TIMEOUT_ACTIVE":
       $("#startMatch").prop("disabled", true);
@@ -168,6 +202,12 @@ var handleArenaStatus = function(data) {
       $("#discardResults").prop("disabled", true);
       $("#editResults").prop("disabled", true);
       $("#startTimeout").prop("disabled", true);
+      $("#blueAutoScore").prop("disabled", false);
+      $("#redAutoScore").prop("disabled", false);
+      $("#blueTeleopScore").prop("disabled", false);
+      $("#redTeleopScore").prop("disabled", false);
+      $("#blueEndgameScore").prop("disabled", false);
+      $("#redEndgameScore").prop("disabled", false);
       break;
     case "POST_TIMEOUT":
       $("#startMatch").prop("disabled", true);
@@ -176,6 +216,12 @@ var handleArenaStatus = function(data) {
       $("#discardResults").prop("disabled", true);
       $("#editResults").prop("disabled", true);
       $("#startTimeout").prop("disabled", true);
+      $("#blueAutoScore").prop("disabled", false);
+      $("#redAutoScore").prop("disabled", false);
+      $("#blueTeleopScore").prop("disabled", false);
+      $("#redTeleopScore").prop("disabled", false);
+      $("#blueEndgameScore").prop("disabled", false);
+      $("#redEndgameScore").prop("disabled", false);
       break;
   }
 
@@ -212,16 +258,6 @@ var handleAudienceDisplayMode = function(data) {
   $("input[name=audienceDisplay][value=" + data + "]").prop("checked", true);
 };
 
-// Handles a websocket message to signal whether the referee and scorers have committed after the match.
-var handleScoringStatus = function(data) {
-  scoreIsReady = data.RefereeScoreReady && data.RedScoreReady && data.BlueScoreReady;
-  $("#refereeScoreStatus").attr("data-ready", data.RefereeScoreReady);
-  $("#redScoreStatus").text("Red Scoring " + data.NumRedScoringPanelsReady + "/" + data.NumRedScoringPanels);
-  $("#redScoreStatus").attr("data-ready", data.RedScoreReady);
-  $("#blueScoreStatus").text("Blue Scoring " + data.NumBlueScoringPanelsReady + "/" + data.NumBlueScoringPanels);
-  $("#blueScoreStatus").attr("data-ready", data.BlueScoreReady);
-};
-
 // Handles a websocket message to update the alliance station display screen selector.
 var handleAllianceStationDisplayMode = function(data) {
   $("input[name=allianceStationDisplay]:checked").prop("checked", false);
@@ -251,6 +287,5 @@ $(function() {
     matchTime: function(event) { handleMatchTime(event.data); },
     matchTiming: function(event) { handleMatchTiming(event.data); },
     realtimeScore: function(event) { handleRealtimeScore(event.data); },
-    scoringStatus: function(event) { handleScoringStatus(event.data); },
   });
 });

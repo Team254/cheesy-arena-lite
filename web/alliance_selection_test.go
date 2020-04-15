@@ -75,7 +75,7 @@ func TestAllianceSelection(t *testing.T) {
 	assert.Contains(t, recorder.Body.String(), ">110<")
 
 	// Finalize alliance selection.
-	web.arena.Database.CreateTeam(&model.Team{Id: 254, YellowCard: true})
+	web.arena.Database.CreateTeam(&model.Team{Id: 254})
 	recorder = web.postHttpResponse("/alliance_selection/finalize", "startTime=2014-01-01 01:00:00 PM")
 	assert.Equal(t, 303, recorder.Code)
 	alliances, err := web.arena.Database.GetAllAlliances()
@@ -88,8 +88,6 @@ func TestAllianceSelection(t *testing.T) {
 	matches, err := web.arena.Database.GetMatchesByType("elimination")
 	assert.Nil(t, err)
 	assert.Equal(t, 6, len(matches))
-	team, _ := web.arena.Database.GetTeamById(254)
-	assert.False(t, team.YellowCard)
 }
 
 func TestAllianceSelectionErrors(t *testing.T) {

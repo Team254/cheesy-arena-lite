@@ -76,10 +76,13 @@ func (web *Web) matchPlayHandler(w http.ResponseWriter, r *http.Request) {
 		MatchesByType         map[string]MatchPlayList
 		CurrentMatchType      string
 		Match                 *model.Match
+		RedScore              *game.Score
+		BlueScore             *game.Score
 		AllowSubstitution     bool
 		IsReplay              bool
 		PlcArmorBlockStatuses map[string]bool
 	}{web.arena.EventSettings, web.arena.Plc.IsEnabled(), matchesByType, currentMatchType, web.arena.CurrentMatch,
+		web.arena.RedScore, web.arena.BlueScore,
 		web.arena.CurrentMatch.ShouldAllowSubstitution(), isReplay, web.arena.Plc.GetArmorBlockStatuses()}
 	err = template.ExecuteTemplate(w, "base", data)
 	if err != nil {
@@ -177,7 +180,7 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 
 	// Subscribe the websocket to the notifiers whose messages will be passed on to the client, in a separate goroutine.
 	go ws.HandleNotifiers(web.arena.MatchTimingNotifier, web.arena.ArenaStatusNotifier, web.arena.MatchTimeNotifier,
-		web.arena.RealtimeScoreNotifier, web.arena.ScoringStatusNotifier, web.arena.AudienceDisplayModeNotifier,
+		web.arena.RealtimeScoreNotifier, web.arena.AudienceDisplayModeNotifier,
 		web.arena.AllianceStationDisplayModeNotifier, web.arena.EventStatusNotifier)
 
 	// Loop, waiting for commands and responding to them, until the client closes the connection.
@@ -308,6 +311,15 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 				ws.WriteError(err.Error())
 				continue
 			}
+		case "updateRealtimeScore":
+			args := data.(map[string]interface{})
+			web.arena.BlueScore.AutoPoints = int(args["blueAuto"].(float64))
+			web.arena.RedScore.AutoPoints = int(args["redAuto"].(float64))
+			web.arena.BlueScore.TeleopPoints = int(args["blueTeleop"].(float64))
+			web.arena.RedScore.TeleopPoints = int(args["redTeleop"].(float64))
+			web.arena.BlueScore.EndgamePoints = int(args["blueEndgame"].(float64))
+			web.arena.RedScore.EndgamePoints = int(args["redEndgame"].(float64))
+			web.arena.RealtimeScoreNotifier.Notify()
 		default:
 			ws.WriteError(fmt.Sprintf("Invalid message type '%s'.", messageType))
 			continue
@@ -325,11 +337,6 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 // Saves the given match and result to the database, supplanting any previous result for the match.
 func (web *Web) commitMatchScore(match *model.Match, matchResult *model.MatchResult, isMatchReviewEdit bool) error {
 	var updatedRankings game.Rankings
-
-	if match.Type == "elimination" {
-		// Adjust the score if necessary for an elimination DQ.
-		matchResult.CorrectEliminationScore()
-	}
 
 	if match.Type != "test" {
 		if matchResult.PlayNumber == 0 {
@@ -359,8 +366,8 @@ func (web *Web) commitMatchScore(match *model.Match, matchResult *model.MatchRes
 
 		// Update and save the match record to the database.
 		match.ScoreCommittedAt = time.Now()
-		redScore := matchResult.RedScoreSummary(true)
-		blueScore := matchResult.BlueScoreSummary(true)
+		redScore := matchResult.RedScoreSummary()
+		blueScore := matchResult.BlueScoreSummary()
 		if redScore.Score > blueScore.Score {
 			match.Status = model.RedWonMatch
 		} else if redScore.Score < blueScore.Score {
@@ -371,11 +378,6 @@ func (web *Web) commitMatchScore(match *model.Match, matchResult *model.MatchRes
 		err := web.arena.Database.SaveMatch(match)
 		if err != nil {
 			return err
-		}
-
-		if match.ShouldUpdateCards() {
-			// Regenerate the residual yellow cards that teams may carry.
-			tournament.CalculateTeamCards(web.arena.Database, match.Type)
 		}
 
 		if match.ShouldUpdateRankings() {
@@ -458,8 +460,7 @@ func (web *Web) commitMatchScore(match *model.Match, matchResult *model.MatchRes
 
 func (web *Web) getCurrentMatchResult() *model.MatchResult {
 	return &model.MatchResult{MatchId: web.arena.CurrentMatch.Id, MatchType: web.arena.CurrentMatch.Type,
-		RedScore: &web.arena.RedRealtimeScore.CurrentScore, BlueScore: &web.arena.BlueRealtimeScore.CurrentScore,
-		RedCards: web.arena.RedRealtimeScore.Cards, BlueCards: web.arena.BlueRealtimeScore.Cards}
+		RedScore: web.arena.RedScore, BlueScore: web.arena.BlueScore}
 }
 
 // Saves the realtime result as the final score for the match currently loaded into the arena.
