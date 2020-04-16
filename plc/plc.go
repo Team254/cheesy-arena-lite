@@ -27,6 +27,7 @@ type Plc struct {
 	oldRegisters     [registerCount]uint16
 	oldCoils         [coilCount]bool
 	cycleCounter     int
+	matchResetCycles int
 }
 
 const (
@@ -193,6 +194,12 @@ func (plc *Plc) GetEthernetConnected() ([3]bool, [3]bool) {
 		}
 }
 
+// Resets the internal state of the PLC to start a new match.
+func (plc *Plc) ResetMatch() {
+	plc.coils[matchReset] = true
+	plc.matchResetCycles = 0
+}
+
 // Sets the on/off state of the stack lights on the scoring table.
 func (plc *Plc) SetStackLights(red, blue, orange, green bool) {
 	plc.coils[stackLightRed] = red
@@ -313,6 +320,11 @@ func (plc *Plc) writeCoils() bool {
 		return false
 	}
 
+	if plc.matchResetCycles > 5 {
+		plc.coils[matchReset] = false // Only need a short pulse to reset the internal state of the PLC.
+	} else {
+		plc.matchResetCycles++
+	}
 	return true
 }
 
