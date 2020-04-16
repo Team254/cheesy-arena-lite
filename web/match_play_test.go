@@ -258,12 +258,24 @@ func TestMatchPlayWebsocketCommands(t *testing.T) {
 	readWebsocketType(t, ws, "audienceDisplayMode")
 	readWebsocketType(t, ws, "allianceStationDisplayMode")
 	assert.Equal(t, field.PostMatch, web.arena.MatchState)
-	web.arena.RedScore.TeleopPoints = 30
-	web.arena.BlueScore.EndgamePoints = 45
+	ws.Write("updateRealtimeScore", map[string]interface{}{
+		"blueAuto": 10,
+		"redAuto": 20,
+		"blueTeleop": 30,
+		"redTeleop": 40,
+		"blueEndgame": 50,
+		"redEndgame": 60,
+	})
+	readWebsocketType(t, ws, "arenaStatus")
+	readWebsocketType(t, ws, "realtimeScore")
+	assert.Equal(t, 20, web.arena.SavedMatchResult.RedScore.AutoPoints)
+	assert.Equal(t, 40, web.arena.SavedMatchResult.RedScore.TeleopPoints)
+	assert.Equal(t, 60, web.arena.SavedMatchResult.RedScore.EndgamePoints)
+	assert.Equal(t, 10, web.arena.SavedMatchResult.BlueScore.AutoPoints)
+	assert.Equal(t, 30, web.arena.SavedMatchResult.BlueScore.TeleopPoints)
+	assert.Equal(t, 50, web.arena.SavedMatchResult.BlueScore.EndgamePoints)
 	ws.Write("commitResults", nil)
 	readWebsocketMultiple(t, ws, 3) // reload, realtimeScore, setAllianceStationDisplay
-	assert.Equal(t, 30, web.arena.SavedMatchResult.RedScore.TeleopPoints)
-	assert.Equal(t, 45, web.arena.SavedMatchResult.BlueScore.EndgamePoints)
 	assert.Equal(t, field.PreMatch, web.arena.MatchState)
 	ws.Write("discardResults", nil)
 	readWebsocketMultiple(t, ws, 3) // reload, realtimeScore, setAllianceStationDisplay
