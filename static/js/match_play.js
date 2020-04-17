@@ -250,7 +250,25 @@ var handleMatchTime = function(data) {
 var handleRealtimeScore = function(data) {
   $("#redScore").text(data.Red.ScoreSummary.Score);
   $("#blueScore").text(data.Blue.ScoreSummary.Score);
-};
+  if (parseInt($("#redAutoScore").val()) != data.Red.Score.AutoPoints) {
+    $("#redAutoScore").val(data.Red.Score.AutoPoints);
+  }
+  if (parseInt($("#redTeleopScore").val()) != data.Red.Score.TeleopPoints) {
+    $("#redTeleopScore").val(data.Red.Score.TeleopPoints);
+  }
+  if (parseInt($("#redEndgameScore").val()) != data.Red.Score.EndgamePoints) {
+    $("#redEndgameScore").val(data.Red.Score.EndgamePoints);
+  }
+  if (parseInt($("#blueAutoScore").val()) != data.Blue.Score.AutoPoints) {
+    $("#blueAutoScore").val(data.Blue.Score.AutoPoints);
+  }
+  if (parseInt($("#blueTeleopScore").val()) != data.Blue.Score.TeleopPoints) {
+    $("#blueTeleopScore").val(data.Blue.Score.TeleopPoints);
+  }
+  if (parseInt($("#blueEndgameScore").val()) != data.Blue.Score.EndgamePoints) {
+    $("#blueEndgameScore").val(data.Blue.Score.EndgamePoints);
+  }
+}
 
 // Handles a websocket message to update the audience display screen selector.
 var handleAudienceDisplayMode = function(data) {

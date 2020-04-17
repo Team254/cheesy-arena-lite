@@ -117,6 +117,8 @@ func (web *Web) newHandler() http.Handler {
 	router.HandleFunc("/api/arena/websocket", web.arenaWebsocketApiHandler).Methods("GET")
 	router.HandleFunc("/api/matches/{type}", web.matchesApiHandler).Methods("GET")
 	router.HandleFunc("/api/rankings", web.rankingsApiHandler).Methods("GET")
+	router.HandleFunc("/api/scores", web.getScoresHandler).Methods("GET")
+	router.HandleFunc("/api/scores", web.setScoresHandler).Methods("PATCH", "PUT")
 	router.HandleFunc("/api/sponsor_slides", web.sponsorSlidesApiHandler).Methods("GET")
 	router.HandleFunc("/api/teams/{teamId}/avatar", web.teamAvatarsApiHandler).Methods("GET")
 	router.HandleFunc("/display", web.placeholderDisplayHandler).Methods("GET")
