@@ -3,6 +3,52 @@
 //
 // Web handlers for handling realtime scores API.
 
+/*
+
+API Docs
+
+JSON Schema:
+
+{
+   “red”: {“auto”: 99, “teleop”: 99, “endgame": 99},
+   “blue”: {“auto”: 99, “teleop”: 99, “endgame": 99}
+}
+
+GET http://10.0.100.5/api/scores
+
+Returns current score.
+
+PUT http://10.0.100.5/api/scores
+
+Sets the current scores from the request body. All
+parts are optional. Anything missing is set to zero.
+
+Example:
+
+{
+   “red”: {“auto”: 10}
+}
+
+Red teleop and endgame are set to zero as well as all blue scores.
+
+PATCH http://10.0.100.5/api/scores
+
+Adds or subtracts the current scores from the request
+body. All parts are optional. Scores missing from the
+request body are left untouched.
+
+Example:
+
+{
+   “red”: {“auto”: 10},
+   "blue": {"teleop": -5}
+}
+
+10 is added to red auto. Red teleop and endgame are left untouched.
+5 is subtracted from blue teleop. Blue auto and endgame are left untouched.
+
+*/
+
 package web
 
 import (
