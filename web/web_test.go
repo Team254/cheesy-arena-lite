@@ -40,10 +40,26 @@ func (web *Web) getHttpResponseWithHeaders(path string, headers map[string]strin
 	return recorder
 }
 
+func (web *Web) patchHttpResponse(path string, body string) *httptest.ResponseRecorder {
+	recorder := httptest.NewRecorder()
+	req, _ := http.NewRequest("PATCH", path, strings.NewReader(body))
+	req.Header.Set("Content-Type", "text/plain")
+	web.newHandler().ServeHTTP(recorder, req)
+	return recorder
+}
+
 func (web *Web) postHttpResponse(path string, body string) *httptest.ResponseRecorder {
 	recorder := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", path, strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	web.newHandler().ServeHTTP(recorder, req)
+	return recorder
+}
+
+func (web *Web) putHttpResponse(path string, body string) *httptest.ResponseRecorder {
+	recorder := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", path, strings.NewReader(body))
+	req.Header.Set("Content-Type", "text/plain")
 	web.newHandler().ServeHTTP(recorder, req)
 	return recorder
 }
