@@ -108,3 +108,8 @@ td[data-plc-value="true"] {
 input[data-changed="true"], select[data-changed="true"] {
   border: 2px solid #f00;
 }
+.score-block {
+  padding: 5px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+}

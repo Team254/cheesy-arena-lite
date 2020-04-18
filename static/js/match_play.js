@@ -70,6 +70,13 @@ var updateRealtimeScore = function() {
   })
 };
 
+var scoreKeyHandler = function(e) {
+  var keycode = (event.keyCode ? event.keyCode : event.which);
+  if (keycode == 13) {
+    $('#' + $(event.target).attr("data-next")).focus().select();
+  }
+};
+
 var confirmCommit = function(isReplay) {
   if (isReplay) {
     // Show the appropriate message(s) in the confirmation dialog.
