@@ -259,12 +259,12 @@ func TestMatchPlayWebsocketCommands(t *testing.T) {
 	readWebsocketType(t, ws, "allianceStationDisplayMode")
 	assert.Equal(t, field.PostMatch, web.arena.MatchState)
 	ws.Write("updateRealtimeScore", map[string]interface{}{
-		"blueAuto": 10,
-		"redAuto": 20,
-		"blueTeleop": 30,
-		"redTeleop": 40,
+		"blueAuto":    10,
+		"redAuto":     20,
+		"blueTeleop":  30,
+		"redTeleop":   40,
 		"blueEndgame": 50,
-		"redEndgame": 60,
+		"redEndgame":  60,
 	})
 	readWebsocketType(t, ws, "arenaStatus")
 	readWebsocketType(t, ws, "realtimeScore")

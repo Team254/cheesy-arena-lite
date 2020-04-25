@@ -32,12 +32,12 @@ type TbaClient struct {
 }
 
 type TbaMatch struct {
-	CompLevel      string                        `json:"comp_level"`
-	SetNumber      int                           `json:"set_number"`
-	MatchNumber    int                           `json:"match_number"`
-	Alliances      map[string]*TbaAlliance       `json:"alliances"`
-	TimeString     string                        `json:"time_string"`
-	TimeUtc        string                        `json:"time_utc"`
+	CompLevel   string                  `json:"comp_level"`
+	SetNumber   int                     `json:"set_number"`
+	MatchNumber int                     `json:"match_number"`
+	Alliances   map[string]*TbaAlliance `json:"alliances"`
+	TimeString  string                  `json:"time_string"`
+	TimeUtc     string                  `json:"time_utc"`
 }
 
 type TbaAlliance struct {

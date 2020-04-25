@@ -60,9 +60,9 @@ func TestPatchScores(t *testing.T) {
 		"{\"red\":{\"auto\":5,\"teleop\":10,\"endgame\":15}}")
 	assert.Equal(t, 200, recorder.Code)
 
-	assert.Equal(t, score1.AutoPoints + 5, web.arena.RedScore.AutoPoints)
-	assert.Equal(t, score1.TeleopPoints + 10, web.arena.RedScore.TeleopPoints)
-	assert.Equal(t, score1.EndgamePoints + 15, web.arena.RedScore.EndgamePoints)
+	assert.Equal(t, score1.AutoPoints+5, web.arena.RedScore.AutoPoints)
+	assert.Equal(t, score1.TeleopPoints+10, web.arena.RedScore.TeleopPoints)
+	assert.Equal(t, score1.EndgamePoints+15, web.arena.RedScore.EndgamePoints)
 	assert.Equal(t, score2.AutoPoints, web.arena.BlueScore.AutoPoints)
 	assert.Equal(t, score2.TeleopPoints, web.arena.BlueScore.TeleopPoints)
 	assert.Equal(t, score2.EndgamePoints, web.arena.BlueScore.EndgamePoints)
@@ -71,12 +71,12 @@ func TestPatchScores(t *testing.T) {
 		"{\"blue\":{\"auto\":-5,\"teleop\":-10,\"endgame\":-15}}")
 	assert.Equal(t, 200, recorder.Code)
 
-	assert.Equal(t, score1.AutoPoints + 5, web.arena.RedScore.AutoPoints)
-	assert.Equal(t, score1.TeleopPoints + 10, web.arena.RedScore.TeleopPoints)
-	assert.Equal(t, score1.EndgamePoints + 15, web.arena.RedScore.EndgamePoints)
-	assert.Equal(t, score2.AutoPoints - 5, web.arena.BlueScore.AutoPoints)
-	assert.Equal(t, score2.TeleopPoints - 10, web.arena.BlueScore.TeleopPoints)
-	assert.Equal(t, score2.EndgamePoints - 15, web.arena.BlueScore.EndgamePoints)
+	assert.Equal(t, score1.AutoPoints+5, web.arena.RedScore.AutoPoints)
+	assert.Equal(t, score1.TeleopPoints+10, web.arena.RedScore.TeleopPoints)
+	assert.Equal(t, score1.EndgamePoints+15, web.arena.RedScore.EndgamePoints)
+	assert.Equal(t, score2.AutoPoints-5, web.arena.BlueScore.AutoPoints)
+	assert.Equal(t, score2.TeleopPoints-10, web.arena.BlueScore.TeleopPoints)
+	assert.Equal(t, score2.EndgamePoints-15, web.arena.BlueScore.EndgamePoints)
 }
 
 func TestPutScores(t *testing.T) {

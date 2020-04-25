@@ -8,15 +8,15 @@ package game
 import "math/rand"
 
 type RankingFields struct {
-	RankingPoints     int
-	AutoPoints        int
-	EndgamePoints     int
-	TeleopPoints      int
-	Random            float64
-	Wins              int
-	Losses            int
-	Ties              int
-	Played            int
+	RankingPoints int
+	AutoPoints    int
+	EndgamePoints int
+	TeleopPoints  int
+	Random        float64
+	Wins          int
+	Losses        int
+	Ties          int
+	Played        int
 }
 
 type Ranking struct {
