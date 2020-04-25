@@ -53,7 +53,6 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/Team254/cheesy-arena/field"
 	"github.com/Team254/cheesy-arena/game"
 	"io/ioutil"
@@ -87,17 +86,16 @@ func (web *Web) getScoresHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (web *Web) setScoresHandler(w http.ResponseWriter, r *http.Request) {
-	if web.arena.MatchState == field.PreMatch || web.arena.MatchState == field.TimeoutActive || web.arena.MatchState == field.PostTimeout {
-		fmt.Fprintf(w, "Score cannot be updated in this match state")
-		w.WriteHeader(http.StatusNotAcceptable)
+	if web.arena.MatchState == field.PreMatch || web.arena.MatchState == field.TimeoutActive ||
+		web.arena.MatchState == field.PostTimeout {
+		http.Error(w, "Score cannot be updated in this match state", http.StatusBadRequest)
 		return
 	}
 
 	var scores jsonScore
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Score data missing")
-		w.WriteHeader(http.StatusNoContent)
+		handleWebErr(w, err)
 		return
 	}
 	json.Unmarshal(reqBody, &scores)
@@ -114,6 +112,4 @@ func (web *Web) setScoresHandler(w http.ResponseWriter, r *http.Request) {
 	web.arena.BlueScore.TeleopPoints += scores.Blue.Teleop
 	web.arena.BlueScore.EndgamePoints += scores.Blue.Endgame
 	web.arena.RealtimeScoreNotifier.Notify()
-
-	w.WriteHeader(http.StatusOK)
 }

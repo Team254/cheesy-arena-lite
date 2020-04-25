@@ -111,11 +111,11 @@ html {
   padding-top: 5px;
   padding-bottom: 5px;
   top: 30px;
-  height: 85px;
+  height: 80px;
 }
 #matchTime {
   position: relative;
-  top: 1px;
+  top: 11px;
   height: 60px;
   color: #222;
   font-family: "FuturaLTBold";
@@ -203,8 +203,8 @@ html {
 }
 #blindsLogo {
   position: relative;
-  top: 37px;
-  height: 185px;
+  top: 65px;
+  height: 160px;
 }
 #finalScore {
   position: fixed;

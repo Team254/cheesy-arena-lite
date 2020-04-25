@@ -43,8 +43,8 @@ func TestPatchScores(t *testing.T) {
 
 	web.arena.MatchState = field.PreMatch
 	recorder = web.patchHttpResponse("/api/scores", "{}")
-	assert.Equal(t, 200, recorder.Code)
-	assert.Equal(t, recorder.Body.String(), "Score cannot be updated in this match state")
+	assert.Equal(t, 400, recorder.Code)
+	assert.Equal(t, "Score cannot be updated in this match state\n", recorder.Body.String())
 
 	score1 := game.TestScore1()
 	score2 := game.TestScore2()
@@ -85,8 +85,8 @@ func TestPutScores(t *testing.T) {
 
 	web.arena.MatchState = field.PreMatch
 	recorder = web.putHttpResponse("/api/scores", "{}")
-	assert.Equal(t, 200, recorder.Code)
-	assert.Equal(t, recorder.Body.String(), "Score cannot be updated in this match state")
+	assert.Equal(t, 400, recorder.Code)
+	assert.Equal(t, "Score cannot be updated in this match state\n", recorder.Body.String())
 
 	score1 := game.TestScore1()
 	score2 := game.TestScore2()
