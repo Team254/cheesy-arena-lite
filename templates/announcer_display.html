@@ -62,56 +62,21 @@
 <script id="matchResultTemplate" type="text/x-handlebars-template">
   <h4>Score</h4>
   <div class="row">
-    <div class="col-lg-7 col-lg-offset-1 control-label">Initiation Line Points</div>
-    <div class="col-lg-2">{{"{{score.InitiationLinePoints}}"}}</div>
+    <div class="col-lg-7 col-lg-offset-1 control-label">Auto Points</div>
+    <div class="col-lg-2">{{"{{score.AutoPoints}}"}}</div>
   </div>
   <div class="row">
-    <div class="col-lg-7 col-lg-offset-1 control-label">Power Cell Points</div>
-    <div class="col-lg-2">{{"{{score.PowerCellPoints}}"}}</div>
-  </div>
-  <div class="row">
-    <div class="col-lg-7 col-lg-offset-1 control-label">Control Panel Points</div>
-    <div class="col-lg-2">{{"{{score.ControlPanelPoints}}"}}</div>
+    <div class="col-lg-7 col-lg-offset-1 control-label">Teleop Points</div>
+    <div class="col-lg-2">{{"{{score.TeleopPoints}}"}}</div>
   </div>
   <div class="row">
     <div class="col-lg-7 col-lg-offset-1 control-label">Endgame Points</div>
     <div class="col-lg-2">{{"{{score.EndgamePoints}}"}}</div>
   </div>
   <div class="row">
-    <div class="col-lg-7 col-lg-offset-1 control-label">Foul Points</div>
-    <div class="col-lg-2">{{"{{score.FoulPoints}}"}}</div>
-  </div>
-  <div class="row">
-    <div class="col-lg-7 col-lg-offset-1 control-label">Control Panel RP</div>
-    <div class="col-lg-2">{{"{{score.ControlPanelRankingPoint}}"}}</div>
-  </div>
-  <div class="row">
-    <div class="col-lg-7 col-lg-offset-1 control-label">Endgame RP</div>
-    <div class="col-lg-2">{{"{{score.EndgameRankingPoint}}"}}</div>
-  </div>
-  <div class="row">
     <div class="col-lg-7 col-lg-offset-1 control-label"><b>Final Score</b></div>
     <div class="col-lg-2"><b>{{"{{score.Score}}"}}</b></div>
   </div>
-  <h4>Fouls</h4>
-  {{"{{#each fouls}}"}}
-    <div class="row">
-      <div class="col-lg-3 col-lg-offset-1">
-        {{"{{#if IsRankingPoint}}"}}Free RP{{"{{else}}"}}{{"{{#if IsTechnical}}"}}Tech {{"{{/if}}"}}Foul{{"{{/if}}"}}
-      </div>
-      <div class="col-lg-3">Team {{"{{TeamId}}"}}</div>
-      <div class="col-lg-3" data-toggle="tooltip" title="{{"{{Description}}"}}">{{"{{RuleNumber}}"}}</div>
-    </div>
-  {{"{{/each}}"}}
-  <h4>Cards</h4>
-  {{"{{#eachMapEntry cards}}"}}
-    {{"{{#if this.value}}"}}
-      <div class="row">
-        <div class="col-lg-3 col-lg-offset-1">Team {{"{{this.key}}"}}</div>
-        <div class="col-lg-3 col-lg-offset-1" style="text-transform: capitalize;">{{"{{this.value}}"}}</div>
-      </div>
-    {{"{{/if}}"}}
-  {{"{{/eachMapEntry}}"}}
   <h4>Rankings</h4>
   {{"{{#eachMapEntry rankings}}"}}
   {{"{{#if this.value}}"}}

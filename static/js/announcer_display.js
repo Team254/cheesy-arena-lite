@@ -50,13 +50,6 @@ var handleRealtimeScore = function(data) {
 
 // Handles a websocket message to populate the final score data.
 var handleScorePosted = function(data) {
-  $.each(data.RedFouls, function(i, foul) {
-    Object.assign(foul, data.RulesViolated[foul.RuleId]);
-  });
-  $.each(data.BlueFouls, function(i, foul) {
-    Object.assign(foul, data.RulesViolated[foul.RuleId]);
-  });
-
   var redRankings = {};
   redRankings[data.Match.Red1] = getRankingText(data.Match.Red1, data.Rankings);
   redRankings[data.Match.Red2] = getRankingText(data.Match.Red2, data.Rankings);
@@ -67,14 +60,9 @@ var handleScorePosted = function(data) {
   blueRankings[data.Match.Blue3] = getRankingText(data.Match.Blue3, data.Rankings);
 
   $("#scoreMatchName").text(data.MatchType + " Match " + data.Match.DisplayName);
-  $("#redScoreDetails").html(matchResultTemplate({score: data.RedScoreSummary, fouls: data.RedFouls,
-      rulesViolated: data.RulesViolated, cards: data.RedCards, rankings: redRankings}));
-  $("#blueScoreDetails").html(matchResultTemplate({score: data.BlueScoreSummary, fouls: data.BlueFouls,
-    rulesViolated: data.RulesViolated, cards: data.BlueCards, rankings: blueRankings}));
+  $("#redScoreDetails").html(matchResultTemplate({score: data.RedScoreSummary, rankings: redRankings}));
+  $("#blueScoreDetails").html(matchResultTemplate({score: data.BlueScoreSummary, rankings: blueRankings}));
   $("#matchResult").modal("show");
-
-  // Activate tooltips above the foul listings.
-  $("[data-toggle=tooltip]").tooltip({"placement": "top"});
 };
 
 // Replaces newlines in team fields with HTML line breaks.
