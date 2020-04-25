@@ -15,7 +15,7 @@ func _() {
 
 const _armorBlock_name = "redDsblueDsarmorBlockCount"
 
-var _armorBlock_index = [...]uint8{0, 5, 11}
+var _armorBlock_index = [...]uint8{0, 5, 11, 26}
 
 func (i armorBlock) String() string {
 	if i < 0 || i >= armorBlock(len(_armorBlock_index)-1) {
