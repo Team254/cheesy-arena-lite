@@ -8,7 +8,7 @@ package model
 import "github.com/Team254/cheesy-arena-lite/game"
 
 type EventSettings struct {
-	Id                          int
+	Id                          int64 `db:"id"`
 	Name                        string
 	NumElimAlliances            int
 	SelectionRound2Order        string
@@ -40,38 +40,39 @@ type EventSettings struct {
 	WarningRemainingDurationSec int
 }
 
-const eventSettingsId = 0
-
 func (database *Database) GetEventSettings() (*EventSettings, error) {
-	eventSettings := new(EventSettings)
-	err := database.eventSettingsMap.Get(eventSettings, eventSettingsId)
-	if err != nil {
-		// Database record doesn't exist yet; create it now.
-		eventSettings.Name = "Untitled Event"
-		eventSettings.NumElimAlliances = 8
-		eventSettings.SelectionRound2Order = "L"
-		eventSettings.SelectionRound3Order = ""
-		eventSettings.TBADownloadEnabled = true
-		eventSettings.ApTeamChannel = 157
-		eventSettings.ApAdminChannel = 0
-		eventSettings.ApAdminWpaKey = "1234Five"
-		eventSettings.Ap2TeamChannel = 0
-		eventSettings.WarmupDurationSec = game.MatchTiming.WarmupDurationSec
-		eventSettings.AutoDurationSec = game.MatchTiming.AutoDurationSec
-		eventSettings.PauseDurationSec = game.MatchTiming.PauseDurationSec
-		eventSettings.TeleopDurationSec = game.MatchTiming.TeleopDurationSec
-		eventSettings.WarningRemainingDurationSec = game.MatchTiming.WarningRemainingDurationSec
-
-		err = database.eventSettingsMap.Insert(eventSettings)
-		if err != nil {
-			return nil, err
-		}
+	var allEventSettings []EventSettings
+	if err := database.eventSettingsTable.getAll(&allEventSettings); err != nil {
+		return nil, err
 	}
-	return eventSettings, nil
+	if len(allEventSettings) == 1 {
+		return &allEventSettings[0], nil
+	}
+
+	// Database record doesn't exist yet; create it now.
+	eventSettings := EventSettings{
+		Name:                        "Untitled Event",
+		NumElimAlliances:            8,
+		SelectionRound2Order:        "L",
+		SelectionRound3Order:        "",
+		TBADownloadEnabled:          true,
+		ApTeamChannel:               157,
+		ApAdminChannel:              0,
+		ApAdminWpaKey:               "1234Five",
+		Ap2TeamChannel:              0,
+		WarmupDurationSec:           game.MatchTiming.WarmupDurationSec,
+		AutoDurationSec:             game.MatchTiming.AutoDurationSec,
+		PauseDurationSec:            game.MatchTiming.PauseDurationSec,
+		TeleopDurationSec:           game.MatchTiming.TeleopDurationSec,
+		WarningRemainingDurationSec: game.MatchTiming.WarningRemainingDurationSec,
+	}
+
+	if err := database.eventSettingsTable.create(&eventSettings); err != nil {
+		return nil, err
+	}
+	return &eventSettings, nil
 }
 
-func (database *Database) SaveEventSettings(eventSettings *EventSettings) error {
-	eventSettings.Id = eventSettingsId
-	_, err := database.eventSettingsMap.Update(eventSettings)
-	return err
+func (database *Database) UpdateEventSettings(eventSettings *EventSettings) error {
+	return database.eventSettingsTable.update(eventSettings)
 }

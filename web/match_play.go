@@ -22,7 +22,7 @@ import (
 )
 
 type MatchPlayListItem struct {
-	Id          int
+	Id          int64
 	DisplayName string
 	Time        string
 	Status      model.MatchStatus
@@ -98,7 +98,7 @@ func (web *Web) matchPlayLoadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vars := mux.Vars(r)
-	matchId, _ := strconv.Atoi(vars["matchId"])
+	matchId, _ := strconv.ParseInt(vars["matchId"], 10, 64)
 	var match *model.Match
 	var err error
 	if matchId == 0 {
@@ -130,7 +130,7 @@ func (web *Web) matchPlayShowResultHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	vars := mux.Vars(r)
-	matchId, _ := strconv.Atoi(vars["matchId"])
+	matchId, _ := strconv.ParseInt(vars["matchId"], 10, 64)
 	match, err := web.arena.Database.GetMatchById(matchId)
 	if err != nil {
 		handleWebErr(w, err)
@@ -358,7 +358,7 @@ func (web *Web) commitMatchScore(match *model.Match, matchResult *model.MatchRes
 			}
 		} else {
 			// We are updating a match result record that already exists.
-			err := web.arena.Database.SaveMatchResult(matchResult)
+			err := web.arena.Database.UpdateMatchResult(matchResult)
 			if err != nil {
 				return err
 			}
@@ -375,7 +375,7 @@ func (web *Web) commitMatchScore(match *model.Match, matchResult *model.MatchRes
 		} else {
 			match.Status = model.TieMatch
 		}
-		err := web.arena.Database.SaveMatch(match)
+		err := web.arena.Database.UpdateMatch(match)
 		if err != nil {
 			return err
 		}
@@ -426,13 +426,11 @@ func (web *Web) commitMatchScore(match *model.Match, matchResult *model.MatchRes
 		if web.arena.EventSettings.TbaPublishingEnabled && match.Type != "practice" {
 			// Publish asynchronously to The Blue Alliance.
 			go func() {
-				err = web.arena.TbaClient.PublishMatches(web.arena.Database)
-				if err != nil {
+				if err = web.arena.TbaClient.PublishMatches(web.arena.Database); err != nil {
 					log.Printf("Failed to publish matches: %s", err.Error())
 				}
 				if match.ShouldUpdateRankings() {
-					err = web.arena.TbaClient.PublishRankings(web.arena.Database)
-					if err != nil {
+					if err = web.arena.TbaClient.PublishRankings(web.arena.Database); err != nil {
 						log.Printf("Failed to publish rankings: %s", err.Error())
 					}
 				}

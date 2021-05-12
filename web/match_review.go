@@ -6,6 +6,7 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Team254/cheesy-arena-lite/model"
 	"github.com/gorilla/mux"
@@ -14,7 +15,7 @@ import (
 )
 
 type MatchReviewListItem struct {
-	Id          int
+	Id          int64
 	DisplayName string
 	Time        string
 	RedTeams    []int
@@ -82,7 +83,7 @@ func (web *Web) matchReviewEditGetHandler(w http.ResponseWriter, r *http.Request
 		handleWebErr(w, err)
 		return
 	}
-	matchResultJson, err := matchResult.Serialize()
+	matchResultJson, err := json.Marshal(matchResult)
 	if err != nil {
 		handleWebErr(w, err)
 		return
@@ -90,8 +91,8 @@ func (web *Web) matchReviewEditGetHandler(w http.ResponseWriter, r *http.Request
 	data := struct {
 		*model.EventSettings
 		Match           *model.Match
-		MatchResultJson *model.MatchResultDb
-	}{web.arena.EventSettings, match, matchResultJson}
+		MatchResultJson string
+	}{web.arena.EventSettings, match, string(matchResultJson)}
 	err = template.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		handleWebErr(w, err)
@@ -105,20 +106,19 @@ func (web *Web) matchReviewEditPostHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	match, matchResult, isCurrent, err := web.getMatchResultFromRequest(r)
+	match, _, isCurrent, err := web.getMatchResultFromRequest(r)
 	if err != nil {
 		handleWebErr(w, err)
 		return
 	}
 
-	matchResultJson := model.MatchResultDb{Id: matchResult.Id, MatchId: match.Id, PlayNumber: matchResult.PlayNumber,
-		MatchType: matchResult.MatchType, RedScoreJson: r.PostFormValue("redScoreJson"),
-		BlueScoreJson: r.PostFormValue("blueScoreJson")}
-
-	// Deserialize the JSON using the same mechanism as to store scoring information in the database.
-	matchResult, err = matchResultJson.Deserialize()
-	if err != nil {
+	var matchResult model.MatchResult
+	if err = json.Unmarshal([]byte(r.PostFormValue("matchResultJson")), &matchResult); err != nil {
 		handleWebErr(w, err)
+		return
+	}
+	if matchResult.MatchId != match.Id {
+		handleWebErr(w, fmt.Errorf("Error: match ID %d from result does not match expected", matchResult.MatchId))
 		return
 	}
 
@@ -129,7 +129,7 @@ func (web *Web) matchReviewEditPostHandler(w http.ResponseWriter, r *http.Reques
 
 		http.Redirect(w, r, "/match_play", 303)
 	} else {
-		err = web.commitMatchScore(match, matchResult, true)
+		err = web.commitMatchScore(match, &matchResult, true)
 		if err != nil {
 			handleWebErr(w, err)
 			return
@@ -148,7 +148,7 @@ func (web *Web) getMatchResultFromRequest(r *http.Request) (*model.Match, *model
 		return web.arena.CurrentMatch, web.getCurrentMatchResult(), true, nil
 	}
 
-	matchId, _ := strconv.Atoi(vars["matchId"])
+	matchId, _ := strconv.ParseInt(vars["matchId"], 10, 64)
 	match, err := web.arena.Database.GetMatchById(matchId)
 	if err != nil {
 		return nil, nil, false, err
@@ -163,6 +163,7 @@ func (web *Web) getMatchResultFromRequest(r *http.Request) (*model.Match, *model
 	if matchResult == nil {
 		// We're scoring a match that hasn't been played yet, but that's okay.
 		matchResult = model.NewMatchResult()
+		matchResult.MatchId = matchId
 		matchResult.MatchType = match.Type
 	}
 

@@ -127,9 +127,8 @@ func TestCommitMatch(t *testing.T) {
 	assert.Nil(t, matchResult)
 
 	// Committing the same match more than once should create a second match result record.
-	match.Id = 1
 	match.Type = "qualification"
-	web.arena.Database.CreateMatch(match)
+	assert.Nil(t, web.arena.Database.CreateMatch(match))
 	matchResult = model.NewMatchResult()
 	matchResult.MatchId = match.Id
 	matchResult.BlueScore = &game.Score{AutoPoints: 10}
@@ -163,7 +162,7 @@ func TestCommitMatch(t *testing.T) {
 	log.SetOutput(&writer)
 	err = web.commitMatchScore(match, matchResult, true)
 	assert.Nil(t, err)
-	time.Sleep(time.Millisecond * 10) // Allow some time for the asynchronous publishing to happen.
+	time.Sleep(time.Millisecond * 100) // Allow some time for the asynchronous publishing to happen.
 	assert.Contains(t, writer.String(), "Failed to publish matches")
 	assert.Contains(t, writer.String(), "Failed to publish rankings")
 }
@@ -183,7 +182,7 @@ func TestCommitEliminationTie(t *testing.T) {
 	match, _ = web.arena.Database.GetMatchById(1)
 	assert.Equal(t, model.TieMatch, match.Status)
 	match.Type = "elimination"
-	web.arena.Database.SaveMatch(match)
+	web.arena.Database.UpdateMatch(match)
 	web.commitMatchScore(match, matchResult, true)
 	match, _ = web.arena.Database.GetMatchById(1)
 	assert.Equal(t, model.TieMatch, match.Status) // No elimination tiebreakers.
