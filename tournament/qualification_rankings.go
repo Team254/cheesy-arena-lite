@@ -76,7 +76,9 @@ func CalculateRankings(database *model.Database, preservePreviousRank bool) (gam
 }
 
 // Incrementally accounts for the given match result in the set of rankings that are being built.
-func addMatchResultToRankings(rankings map[int]*game.Ranking, teamId int, matchResult *model.MatchResult, isRed bool) {
+func addMatchResultToRankings(
+	rankings map[int]*game.Ranking, teamId int, matchResult *model.MatchResult, isRed bool,
+) {
 	ranking := rankings[teamId]
 	if ranking == nil {
 		ranking = &game.Ranking{TeamId: teamId}

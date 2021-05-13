@@ -4,6 +4,7 @@
 package web
 
 import (
+	"github.com/Team254/cheesy-arena-lite/model"
 	"github.com/Team254/cheesy-arena-lite/websocket"
 	gorillawebsocket "github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
@@ -43,6 +44,7 @@ func TestFieldMonitorDisplayWebsocket(t *testing.T) {
 
 func TestFieldMonitorFtaDisplayWebsocket(t *testing.T) {
 	web := setupTestWeb(t)
+	web.arena.Database.CreateTeam(&model.Team{Id: 254})
 	assert.Nil(t, web.arena.SubstituteTeam(254, "B1"))
 
 	server, wsUrl := web.startTestServer()

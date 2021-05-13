@@ -82,7 +82,7 @@ func (arena *Arena) generateArenaStatusMessage() interface{} {
 	}
 
 	return &struct {
-		MatchId          int64
+		MatchId          int
 		AllianceStations map[string]*AllianceStation
 		TeamWifiStatuses map[string]network.TeamWifiStatus
 		MatchState
