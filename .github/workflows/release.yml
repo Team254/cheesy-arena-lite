@@ -1,0 +1,111 @@
+on:
+  push:
+    tags:
+      - "v*"
+name: Create Release
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    env:
+      ASSET_FILES: LICENSE README.md access_point_config.tar.gz fix_avatar_colors_for_overlay font schedules static
+          switch_config.txt templates tunnel
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16.x
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Cheesy Arena Lite ${{ github.ref }}
+          body: This is a release of Cheesy Arena Lite, the game-agnostic version of Cheesy Arena. Download the version
+              for your operating system below. Supported operating systems are Linux, macOS (x64 and M1), and Windows.
+          draft: false
+          prerelease: false
+
+      - name: Set additional environment variables
+        run: |
+          echo "LINUX_X64_FILENAME=cheesy-arena-lite.${GITHUB_REF:10}.linux.x64.zip" >> $GITHUB_ENV
+          echo "MACOS_X64_FILENAME=cheesy-arena-lite.${GITHUB_REF:10}.macos.x64.zip" >> $GITHUB_ENV
+          echo "MACOS_M1_FILENAME=cheesy-arena-lite.${GITHUB_REF:10}.macos.m1.zip" >> $GITHUB_ENV
+          echo "WINDOWS_X64_FILENAME=cheesy-arena-lite.${GITHUB_REF:10}.windows.x64.zip" >> $GITHUB_ENV
+
+      - name: Build Linux bundle
+        run: |
+          rm -rf cheesy-arena-lite*
+          mkdir cheesy-arena-lite
+          GOOS=linux GOARCH=amd64 go build -o cheesy-arena-lite/
+          cp -r ${{ env.ASSET_FILES }} cheesy-arena-lite/
+          zip -r -X ${{ env.LINUX_X64_FILENAME }} cheesy-arena-lite
+
+      - name: Upload Linux bundle
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.LINUX_X64_FILENAME }}
+          asset_name: ${{ env.LINUX_X64_FILENAME }}
+          asset_content_type: application/zip
+
+      - name: Build MacOS x64 bundle
+        run: |
+          rm -rf cheesy-arena-lite*
+          mkdir cheesy-arena-lite
+          GOOS=darwin GOARCH=amd64 go build -o cheesy-arena-lite/
+          cp -r ${{ env.ASSET_FILES }} cheesy-arena-lite/
+          zip -r -X ${{ env.MACOS_X64_FILENAME }} cheesy-arena-lite
+
+      - name: Upload MacOS x64 bundle
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.MACOS_X64_FILENAME }}
+          asset_name: ${{ env.MACOS_X64_FILENAME }}
+          asset_content_type: application/zip
+
+      - name: Build MacOS M1 bundle
+        run: |
+          rm -rf cheesy-arena-lite*
+          mkdir cheesy-arena-lite
+          GOOS=darwin GOARCH=arm64 go build -o cheesy-arena-lite/
+          cp -r ${{ env.ASSET_FILES }} cheesy-arena-lite/
+          zip -r -X ${{ env.MACOS_M1_FILENAME }} cheesy-arena-lite
+
+      - name: Upload MacOS M1 bundle
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.MACOS_M1_FILENAME }}
+          asset_name: ${{ env.MACOS_M1_FILENAME }}
+          asset_content_type: application/zip
+
+      - name: Build Windows bundle
+        run: |
+          rm -rf cheesy-arena-lite*
+          mkdir cheesy-arena-lite
+          GOOS=windows GOARCH=amd64 go build -o cheesy-arena-lite/
+          cp -r ${{ env.ASSET_FILES }} cheesy-arena-lite/
+          zip -r -X ${{ env.WINDOWS_X64_FILENAME }} cheesy-arena-lite
+
+      - name: Upload Windows bundle
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.WINDOWS_X64_FILENAME }}
+          asset_name: ${{ env.WINDOWS_X64_FILENAME }}
+          asset_content_type: application/zip
