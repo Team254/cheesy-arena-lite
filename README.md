@@ -1,4 +1,4 @@
-Cheesy Arena Lite [![Build Status](https://travis-ci.org/Team254/cheesy-arena.svg?branch=lite)](https://travis-ci.org/Team254/cheesy-arena)
+Cheesy Arena Lite [![Build Status](https://github.com/Team254/cheesy-arena-lite/actions/workflows/test.yml/badge.svg)](https://github.com/Team254/cheesy-arena-lite/actions)
 ============
 A game-agnostic field management system that just works.
 
