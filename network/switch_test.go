@@ -6,7 +6,7 @@ package network
 import (
 	"bytes"
 	"fmt"
-	"github.com/Team254/cheesy-arena/model"
+	"github.com/Team254/cheesy-arena-lite/model"
 	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"

@@ -2,7 +2,7 @@
 *.o
 *.a
 *.so
-cheesy-arena
+cheesy-arena-lite
 
 # Folders
 _obj

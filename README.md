@@ -2,7 +2,7 @@ Cheesy Arena Lite [![Build Status](https://travis-ci.org/Team254/cheesy-arena.sv
 ============
 A game-agnostic field management system that just works.
 
-For the game-specific version, switch to the `master` branch or see [Cheesy Arena](https://github.com/Team254/cheesy-arena/tree/master).
+For the game-specific version, see [Cheesy Arena](https://github.com/Team254/cheesy-arena).
 
 ## Key features
 **For participants and spectators:**
@@ -64,7 +64,7 @@ See the [Advanced Networking wiki page](https://github.com/Team254/cheesy-arena/
 Cheesy Arena is far from finished! You can help by:
 
 * Checking out the [TODO list](TODO.md), writing a missing feature, and sending a pull request
-* Filing any bugs or feature requests using the [issue tracker](https://github.com/Team254/cheesy-arena/issues)
+* Filing any bugs or feature requests using the [issue tracker](https://github.com/Team254/cheesy-arena-lite/issues)
 * Contributing documentation to the [wiki](https://github.com/Team254/cheesy-arena/wiki)
 * Sending baked goods to [Pat](https://github.com/patfair)
 

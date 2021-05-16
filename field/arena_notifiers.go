@@ -7,10 +7,10 @@ package field
 
 import (
 	"fmt"
-	"github.com/Team254/cheesy-arena/game"
-	"github.com/Team254/cheesy-arena/model"
-	"github.com/Team254/cheesy-arena/network"
-	"github.com/Team254/cheesy-arena/websocket"
+	"github.com/Team254/cheesy-arena-lite/game"
+	"github.com/Team254/cheesy-arena-lite/model"
+	"github.com/Team254/cheesy-arena-lite/network"
+	"github.com/Team254/cheesy-arena-lite/websocket"
 	"strconv"
 )
 

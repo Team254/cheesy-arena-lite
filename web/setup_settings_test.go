@@ -5,9 +5,9 @@ package web
 
 import (
 	"bytes"
-	"github.com/Team254/cheesy-arena/game"
-	"github.com/Team254/cheesy-arena/model"
-	"github.com/Team254/cheesy-arena/tournament"
+	"github.com/Team254/cheesy-arena-lite/game"
+	"github.com/Team254/cheesy-arena-lite/model"
+	"github.com/Team254/cheesy-arena-lite/tournament"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"mime/multipart"

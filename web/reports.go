@@ -7,7 +7,7 @@ package web
 
 import (
 	"fmt"
-	"github.com/Team254/cheesy-arena/tournament"
+	"github.com/Team254/cheesy-arena-lite/tournament"
 	"github.com/gorilla/mux"
 	"github.com/jung-kurt/gofpdf"
 	"net/http"

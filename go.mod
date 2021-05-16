@@ -1,4 +1,4 @@
-module github.com/Team254/cheesy-arena
+module github.com/Team254/cheesy-arena-lite
 
 go 1.16
 

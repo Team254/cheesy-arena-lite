@@ -7,7 +7,7 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/Team254/cheesy-arena/game"
+	"github.com/Team254/cheesy-arena-lite/game"
 )
 
 type RankingDb struct {

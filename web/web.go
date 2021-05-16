@@ -7,8 +7,8 @@ package web
 
 import (
 	"fmt"
-	"github.com/Team254/cheesy-arena/field"
-	"github.com/Team254/cheesy-arena/model"
+	"github.com/Team254/cheesy-arena-lite/field"
+	"github.com/Team254/cheesy-arena-lite/model"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
