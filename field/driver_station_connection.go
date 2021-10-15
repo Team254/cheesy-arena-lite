@@ -48,6 +48,11 @@ type DriverStationConnection struct {
 	tcpConn                   net.Conn
 	udpConn                   net.Conn
 	log                       *TeamMatchLog
+
+	// WrongStation indicates if the team in the station is the incorrect team
+	// by being non-empty. If the team is in the correct station, or no team is
+	// connected, this is empty.
+	WrongStation string
 }
 
 var allianceStationPositionMap = map[string]byte{"R1": 0, "R2": 1, "R3": 2, "B1": 3, "B2": 4, "B3": 5}
@@ -319,8 +324,9 @@ func (arena *Arena) listenForDriverStations() {
 		teamDigit1, _ := strconv.Atoi(teamDigits[1])
 		teamDigit2, _ := strconv.Atoi(teamDigits[2])
 		stationTeamId := teamDigit1*100 + teamDigit2
+		wrongAssignedStation := ""
 		if stationTeamId != teamId {
-			wrongAssignedStation := arena.getAssignedAllianceStation(stationTeamId)
+			wrongAssignedStation = arena.getAssignedAllianceStation(stationTeamId)
 			if wrongAssignedStation != "" {
 				// The team is supposed to be in this match, but is plugged into the wrong station.
 				log.Printf("Team %d is in incorrect station %s.", teamId, wrongAssignedStation)
@@ -349,6 +355,10 @@ func (arena *Arena) listenForDriverStations() {
 			continue
 		}
 		arena.AllianceStations[assignedStation].DsConn = dsConn
+
+		if wrongAssignedStation != "" {
+			dsConn.WrongStation = wrongAssignedStation
+		}
 
 		// Spin up a goroutine to handle further TCP communication with this driver station.
 		go dsConn.handleTcpConnection(arena)
