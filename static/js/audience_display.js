@@ -452,7 +452,7 @@ var getAvatarUrl = function(teamId) {
 var getRankingText = function(teamId, rankings) {
   var ranking = rankings[teamId];
   if (ranking === undefined || ranking.Rank === 0) {
-    return "";
+    return "<div class='rank-spacer'></div>";
   }
 
   if (ranking.Rank > ranking.PreviousRank && ranking.PreviousRank > 0) {
