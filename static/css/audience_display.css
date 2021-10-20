@@ -275,7 +275,7 @@ html {
   border-top-right-radius: 3px;
 }
 .rank-box.rank-same {
-  color: #000;
+  color: #222;
   background-color: #aaa; 
   border-radius: 3px;
 }
@@ -499,4 +499,7 @@ html {
   display: none;
   font-family: "FuturaLTBold";
   line-height: 87px;
+}
+.prescore-spacer {
+  height: 5px;
 }
