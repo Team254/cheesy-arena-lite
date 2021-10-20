@@ -90,12 +90,9 @@ var handleRealtimeScore = function(data) {
 // Handles a websocket message to populate the final score data.
 var handleScorePosted = function(data) {
   $("#" + redSide + "FinalScore").text(data.RedScoreSummary.Score);
-//  $("#" + redSide + "FinalTeam1").html(data.Match.Red1 + "" + getRankingText(data.Match.Red1, data.Rankings));
-//  $("#" + redSide + "FinalTeam2").html(data.Match.Red2 + "" + getRankingText(data.Match.Red2, data.Rankings));
-//  $("#" + redSide + "FinalTeam3").html(data.Match.Red3 + "" + getRankingText(data.Match.Red3, data.Rankings));
-  $("#" + redSide + "FinalTeam1").html(getNewRankingText(data.Match.Red1, data.Rankings) + "" + data.Match.Red1);
-  $("#" + redSide + "FinalTeam2").html(getNewRankingText(data.Match.Red2, data.Rankings) + "" + data.Match.Red2);
-  $("#" + redSide + "FinalTeam3").html(getNewRankingText(data.Match.Red3, data.Rankings) + "" + data.Match.Red3);
+  $("#" + redSide + "FinalTeam1").html(getRankingText(data.Match.Red1, data.Rankings) + "" + data.Match.Red1);
+  $("#" + redSide + "FinalTeam2").html(getRankingText(data.Match.Red2, data.Rankings) + "" + data.Match.Red2);
+  $("#" + redSide + "FinalTeam3").html(getRankingText(data.Match.Red3, data.Rankings) + "" + data.Match.Red3);
   $("#" + redSide + "FinalTeam1Avatar").attr("src", getAvatarUrl(data.Match.Red1));
   $("#" + redSide + "FinalTeam2Avatar").attr("src", getAvatarUrl(data.Match.Red2));
   $("#" + redSide + "FinalTeam3Avatar").attr("src", getAvatarUrl(data.Match.Red3));
@@ -103,12 +100,9 @@ var handleScorePosted = function(data) {
   $("#" + redSide + "FinalTeleopPoints").text(data.RedScoreSummary.TeleopPoints);
   $("#" + redSide + "FinalEndgamePoints").text(data.RedScoreSummary.EndgamePoints);
   $("#" + blueSide + "FinalScore").text(data.BlueScoreSummary.Score);
-  //$("#" + blueSide + "FinalTeam1").html(data.Match.Blue1 + "" + getRankingText(data.Match.Blue1, data.Rankings));
-  //$("#" + blueSide + "FinalTeam2").html(data.Match.Blue2 + "" + getRankingText(data.Match.Blue2, data.Rankings));
-  //$("#" + blueSide + "FinalTeam3").html(data.Match.Blue3 + "" + getRankingText(data.Match.Blue3, data.Rankings));
-  $("#" + blueSide + "FinalTeam1").html(getNewRankingText(data.Match.Blue1, data.Rankings) + "" + data.Match.Blue1);
-  $("#" + blueSide + "FinalTeam2").html(getNewRankingText(data.Match.Blue2, data.Rankings) + "" + data.Match.Blue2);
-  $("#" + blueSide + "FinalTeam3").html(getNewRankingText(data.Match.Blue3, data.Rankings) + "" + data.Match.Blue3);
+  $("#" + blueSide + "FinalTeam1").html(getRankingText(data.Match.Blue1, data.Rankings) + "" + data.Match.Blue1);
+  $("#" + blueSide + "FinalTeam2").html(getRankingText(data.Match.Blue2, data.Rankings) + "" + data.Match.Blue2);
+  $("#" + blueSide + "FinalTeam3").html(getRankingText(data.Match.Blue3, data.Rankings) + "" + data.Match.Blue3);
   $("#" + blueSide + "FinalTeam1Avatar").attr("src", getAvatarUrl(data.Match.Blue1));
   $("#" + blueSide + "FinalTeam2Avatar").attr("src", getAvatarUrl(data.Match.Blue2));
   $("#" + blueSide + "FinalTeam3Avatar").attr("src", getAvatarUrl(data.Match.Blue3));
@@ -455,7 +449,7 @@ var getAvatarUrl = function(teamId) {
   return "/api/teams/" + teamId + "/avatar";
 };
 
-var getNewRankingText = function(teamId, rankings) {
+var getRankingText = function(teamId, rankings) {
   var ranking = rankings[teamId];
   if (ranking === undefined || ranking.Rank === 0) {
     return "";
@@ -467,21 +461,6 @@ var getNewRankingText = function(teamId, rankings) {
     return "<div class='rank-box rank-up'>" + ranking.Rank + "</div><div class='arrow-up'></div>";
   }
   return "<div class='rank-box rank-same'>" + ranking.Rank + "</div>";
-};
-
-// Returns the string to be displayed next to the team number on the final score screen, to indicate change in rank.
-var getRankingText = function(teamId, rankings) {
-  var ranking = rankings[teamId];
-  if (ranking === undefined || ranking.Rank === 0) {
-    return "";
-  }
-  var arrow = "";
-  if (ranking.Rank > ranking.PreviousRank && ranking.PreviousRank > 0) {
-    arrow = "<span class='rank-down'>&#9660;</span>";
-  } else if (ranking.Rank < ranking.PreviousRank) {
-    arrow = "<span class='rank-up'>&#9650;</span>";
-  }
-  return "<sup>" + ranking.Rank + arrow + "</sup>";
 };
 
 $(function() {
