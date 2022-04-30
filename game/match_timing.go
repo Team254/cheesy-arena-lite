@@ -25,11 +25,6 @@ func GetDurationToTeleopStart() time.Duration {
 		time.Second
 }
 
-func GetDurationToWarning() time.Duration {
-	return time.Duration(MatchTiming.WarmupDurationSec+MatchTiming.AutoDurationSec+MatchTiming.PauseDurationSec+
-		MatchTiming.TeleopDurationSec-MatchTiming.WarningRemainingDurationSec) * time.Second
-}
-
 func GetDurationToTeleopEnd() time.Duration {
 	return time.Duration(MatchTiming.WarmupDurationSec+MatchTiming.AutoDurationSec+MatchTiming.PauseDurationSec+
 		MatchTiming.TeleopDurationSec) * time.Second
