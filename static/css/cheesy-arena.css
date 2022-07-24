@@ -113,3 +113,10 @@ input[data-changed="true"], select[data-changed="true"] {
   border-radius: 3px;
   border: 1px solid #ddd;
 }
+.status-well {
+  margin-bottom: 10px;
+}
+#buttonBottomRow {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}

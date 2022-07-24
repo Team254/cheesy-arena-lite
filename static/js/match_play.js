@@ -28,6 +28,16 @@ var abortMatch = function() {
   websocket.send("abortMatch");
 };
 
+// Sends a websocket message to signal to the volunteers that they may enter the field.
+var signalVolunteers = function() {
+  websocket.send("signalVolunteers");
+};
+
+// Sends a websocket message to signal to the teams that they may enter the field.
+var signalReset = function() {
+  websocket.send("signalReset");
+};
+
 // Sends a websocket message to commit the match score and load the next match.
 var commitResults = function() {
   websocket.send("commitResults");
@@ -153,6 +163,8 @@ var handleArenaStatus = function(data) {
     case "PRE_MATCH":
       $("#startMatch").prop("disabled", !data.CanStartMatch);
       $("#abortMatch").prop("disabled", true);
+      $("#signalVolunteers").prop("disabled", true);
+      $("#signalReset").prop("disabled", true);
       $("#commitResults").prop("disabled", true);
       $("#discardResults").prop("disabled", true);
       $("#editResults").prop("disabled", true);
@@ -177,6 +189,8 @@ var handleArenaStatus = function(data) {
     case "TELEOP_PERIOD":
       $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", false);
+      $("#signalVolunteers").prop("disabled", true);
+      $("#signalReset").prop("disabled", true);
       $("#commitResults").prop("disabled", true);
       $("#discardResults").prop("disabled", true);
       $("#editResults").prop("disabled", true);
@@ -191,6 +205,8 @@ var handleArenaStatus = function(data) {
     case "POST_MATCH":
       $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", true);
+      $("#signalVolunteers").prop("disabled", false);
+      $("#signalReset").prop("disabled", false);
       $("#commitResults").prop("disabled", false);
       $("#discardResults").prop("disabled", false);
       $("#editResults").prop("disabled", false);
@@ -205,6 +221,8 @@ var handleArenaStatus = function(data) {
     case "TIMEOUT_ACTIVE":
       $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", false);
+      $("#signalVolunteers").prop("disabled", true);
+      $("#signalReset").prop("disabled", true);
       $("#commitResults").prop("disabled", true);
       $("#discardResults").prop("disabled", true);
       $("#editResults").prop("disabled", true);
@@ -219,6 +237,8 @@ var handleArenaStatus = function(data) {
     case "POST_TIMEOUT":
       $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", true);
+      $("#signalVolunteers").prop("disabled", true);
+      $("#signalReset").prop("disabled", true);
       $("#commitResults").prop("disabled", true);
       $("#discardResults").prop("disabled", true);
       $("#editResults").prop("disabled", true);
