@@ -326,6 +326,19 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 				ws.WriteError(err.Error())
 				continue
 			}
+		case "setTestMatchName":
+			if web.arena.CurrentMatch.Type != "test" {
+				// Don't allow changing the name of a non-test match.
+				continue
+			}
+			name, ok := data.(string)
+			if !ok {
+				ws.WriteError(fmt.Sprintf("Failed to parse '%s' message.", messageType))
+				continue
+			}
+			web.arena.CurrentMatch.DisplayName = name
+			web.arena.MatchLoadNotifier.Notify()
+			continue
 		case "updateRealtimeScore":
 			args := data.(map[string]interface{})
 			web.arena.BlueScore.AutoPoints = int(args["blueAuto"].(float64))

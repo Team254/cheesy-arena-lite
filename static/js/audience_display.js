@@ -9,6 +9,7 @@ var transitionMap;
 var currentScreen = "blank";
 var redSide;
 var blueSide;
+var currentMatch;
 var overlayCenteringHideParams;
 var overlayCenteringShowParams;
 var allianceSelectionTemplate = Handlebars.compile($("#allianceSelectionTemplate").html());
@@ -54,19 +55,25 @@ var handleAudienceDisplayMode = function(targetScreen) {
 
 // Handles a websocket message to update the teams for the current match.
 var handleMatchLoad = function(data) {
-  $("#" + redSide + "Team1").text(data.Match.Red1);
-  $("#" + redSide + "Team2").text(data.Match.Red2);
-  $("#" + redSide + "Team3").text(data.Match.Red3);
-  $("#" + redSide + "Team1Avatar").attr("src", getAvatarUrl(data.Match.Red1));
-  $("#" + redSide + "Team2Avatar").attr("src", getAvatarUrl(data.Match.Red2));
-  $("#" + redSide + "Team3Avatar").attr("src", getAvatarUrl(data.Match.Red3));
-  $("#" + blueSide + "Team1").text(data.Match.Blue1);
-  $("#" + blueSide + "Team2").text(data.Match.Blue2);
-  $("#" + blueSide + "Team3").text(data.Match.Blue3);
-  $("#" + blueSide + "Team1Avatar").attr("src", getAvatarUrl(data.Match.Blue1));
-  $("#" + blueSide + "Team2Avatar").attr("src", getAvatarUrl(data.Match.Blue2));
-  $("#" + blueSide + "Team3Avatar").attr("src", getAvatarUrl(data.Match.Blue3));
-  $("#matchName").text(data.MatchType + " " + data.Match.DisplayName);
+  currentMatch = data.Match;
+  $("#" + redSide + "Team1").text(currentMatch.Red1);
+  $("#" + redSide + "Team2").text(currentMatch.Red2);
+  $("#" + redSide + "Team3").text(currentMatch.Red3);
+  $("#" + redSide + "Team1Avatar").attr("src", getAvatarUrl(currentMatch.Red1));
+  $("#" + redSide + "Team2Avatar").attr("src", getAvatarUrl(currentMatch.Red2));
+  $("#" + redSide + "Team3Avatar").attr("src", getAvatarUrl(currentMatch.Red3));
+  $("#" + blueSide + "Team1").text(currentMatch.Blue1);
+  $("#" + blueSide + "Team2").text(currentMatch.Blue2);
+  $("#" + blueSide + "Team3").text(currentMatch.Blue3);
+  $("#" + blueSide + "Team1Avatar").attr("src", getAvatarUrl(currentMatch.Blue1));
+  $("#" + blueSide + "Team2Avatar").attr("src", getAvatarUrl(currentMatch.Blue2));
+  $("#" + blueSide + "Team3Avatar").attr("src", getAvatarUrl(currentMatch.Blue3));
+
+  if (data.Match.Type === "test") {
+    $("#matchName").text(currentMatch.DisplayName);
+  } else {
+    $("#matchName").text(data.MatchType + " " + currentMatch.DisplayName);
+  }
 };
 
 // Handles a websocket message to update the match time countdown.
