@@ -65,6 +65,11 @@ func (web *Web) matchPlayHandler(w http.ResponseWriter, r *http.Request) {
 	if currentMatchType == "test" {
 		currentMatchType = "practice"
 	}
+	redOffFieldTeams, blueOffFieldTeams, err := web.arena.Database.GetOffFieldTeamIds(web.arena.CurrentMatch)
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
 	matchResult, err := web.arena.Database.GetMatchResultForMatch(web.arena.CurrentMatch.Id)
 	if err != nil {
 		handleWebErr(w, err)
@@ -77,14 +82,27 @@ func (web *Web) matchPlayHandler(w http.ResponseWriter, r *http.Request) {
 		MatchesByType         map[string]MatchPlayList
 		CurrentMatchType      string
 		Match                 *model.Match
+		RedOffFieldTeams      []int
+		BlueOffFieldTeams     []int
 		RedScore              *game.Score
 		BlueScore             *game.Score
 		AllowSubstitution     bool
 		IsReplay              bool
 		PlcArmorBlockStatuses map[string]bool
-	}{web.arena.EventSettings, web.arena.Plc.IsEnabled(), matchesByType, currentMatchType, web.arena.CurrentMatch,
-		web.arena.RedScore, web.arena.BlueScore,
-		web.arena.CurrentMatch.ShouldAllowSubstitution(), isReplay, web.arena.Plc.GetArmorBlockStatuses()}
+	}{
+		web.arena.EventSettings,
+		web.arena.Plc.IsEnabled(),
+		matchesByType,
+		currentMatchType,
+		web.arena.CurrentMatch,
+		redOffFieldTeams,
+		blueOffFieldTeams,
+		web.arena.RedScore,
+		web.arena.BlueScore,
+		web.arena.CurrentMatch.ShouldAllowSubstitution(),
+		isReplay,
+		web.arena.Plc.GetArmorBlockStatuses(),
+	}
 	err = template.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		handleWebErr(w, err)
