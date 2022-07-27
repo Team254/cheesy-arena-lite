@@ -26,12 +26,29 @@ var handleAudienceDisplayMode = function(targetScreen) {
 // Handles a websocket message to update the teams for the current match.
 var handleMatchLoad = function(data) {
   $("#matchName").text(data.MatchType + " Match " + data.Match.DisplayName);
-  $("#red1").html(teamTemplate(formatTeam(data.Teams["R1"])));
-  $("#red2").html(teamTemplate(formatTeam(data.Teams["R2"])));
-  $("#red3").html(teamTemplate(formatTeam(data.Teams["R3"])));
-  $("#blue1").html(teamTemplate(formatTeam(data.Teams["B1"])));
-  $("#blue2").html(teamTemplate(formatTeam(data.Teams["B2"])));
-  $("#blue3").html(teamTemplate(formatTeam(data.Teams["B3"])));
+
+  const teams = $("#teams");
+  teams.empty();
+
+  if (data.Match.Type === "elimination") {
+    teams.append(createAllianceElement("red", data.Match.ElimRedAlliance));
+  }
+  teams.append(createTeamElement("red", data.Teams["R1"], false));
+  teams.append(createTeamElement("red", data.Teams["R2"], false));
+  teams.append(createTeamElement("red", data.Teams["R3"], false));
+  for (team of data.RedOffFieldTeams) {
+    teams.append(createTeamElement("red", team, true));
+  }
+
+  if (data.Match.Type === "elimination") {
+    teams.append(createAllianceElement("blue", data.Match.ElimBlueAlliance));
+  }
+  teams.append(createTeamElement("blue", data.Teams["B1"], false));
+  teams.append(createTeamElement("blue", data.Teams["B2"], false));
+  teams.append(createTeamElement("blue", data.Teams["B3"], false));
+  for (team of data.BlueOffFieldTeams) {
+    teams.append(createTeamElement("blue", team, true));
+  }
 };
 
 // Handles a websocket message to update the match time countdown.
@@ -63,6 +80,19 @@ var handleScorePosted = function(data) {
   $("#redScoreDetails").html(matchResultTemplate({score: data.RedScoreSummary, rankings: redRankings}));
   $("#blueScoreDetails").html(matchResultTemplate({score: data.BlueScoreSummary, rankings: blueRankings}));
   $("#matchResult").modal("show");
+};
+
+// Creates the block containing the playoff alliance number.
+var createAllianceElement = function(alliance, allianceNumber) {
+  return $(`<div class="row well-sm well-dark${alliance}"><h3><b>Alliance ${allianceNumber}</b></h3></div>`);
+};
+
+// Creates the block containing the information for a single team.
+var createTeamElement = function(alliance, team, isOffField) {
+  team.isOffField = isOffField;
+  const element = $(`<div class="row well-sm well-dark${alliance}"></div>`)
+  element.html(teamTemplate(formatTeam(team)));
+  return element;
 };
 
 // Replaces newlines in team fields with HTML line breaks.
