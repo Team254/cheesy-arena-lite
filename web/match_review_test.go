@@ -114,3 +114,44 @@ func TestMatchReviewCreateNewResult(t *testing.T) {
 	assert.Contains(t, recorder.Body.String(), ">60<")  // The red score
 	assert.Contains(t, recorder.Body.String(), ">150<") // The blue score
 }
+
+func TestMatchReviewEditCurrentMatch(t *testing.T) {
+	web := setupTestWeb(t)
+
+	match := model.Match{
+		Type:        "qualification",
+		DisplayName: "352",
+		Red1:        1001,
+		Red2:        1002,
+		Red3:        1003,
+		Blue1:       1004,
+		Blue2:       1005,
+		Blue3:       1006,
+	}
+	web.arena.Database.CreateMatch(&match)
+	web.arena.LoadMatch(&match)
+	assert.Equal(t, match, *web.arena.CurrentMatch)
+
+	recorder := web.getHttpResponse("/match_review/current/edit")
+	assert.Equal(t, 200, recorder.Code)
+	assert.Contains(t, recorder.Body.String(), " 352 ")
+
+	postBody := fmt.Sprintf(
+		"matchResultJson={\"MatchId\":%d,\"RedScore\":{\"AutoPoints\":10,\"TeleopPoints\":20,\"EndgamePoints\":30},"+
+			"\"BlueScore\":{\"AutoPoints\":40,\"TeleopPoints\":50,\"EndgamePoints\":60}}",
+		match.Id,
+	)
+	recorder = web.postHttpResponse("/match_review/current/edit", postBody)
+	assert.Equal(t, 303, recorder.Code, recorder.Body.String())
+	assert.Equal(t, "/match_play", recorder.Header().Get("Location"))
+
+	// Check that the persisted match is still unedited and that the realtime scores have been updated instead.
+	match2, _ := web.arena.Database.GetMatchById(match.Id)
+	assert.Equal(t, model.MatchNotPlayed, match2.Status)
+	assert.Equal(t, 10, web.arena.RedScore.AutoPoints)
+	assert.Equal(t, 20, web.arena.RedScore.TeleopPoints)
+	assert.Equal(t, 30, web.arena.RedScore.EndgamePoints)
+	assert.Equal(t, 40, web.arena.BlueScore.AutoPoints)
+	assert.Equal(t, 50, web.arena.BlueScore.TeleopPoints)
+	assert.Equal(t, 60, web.arena.BlueScore.EndgamePoints)
+}
