@@ -6,6 +6,7 @@ package field
 import (
 	"github.com/Team254/cheesy-arena-lite/game"
 	"github.com/Team254/cheesy-arena-lite/model"
+	"github.com/Team254/cheesy-arena-lite/tournament"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -425,6 +426,8 @@ func TestLoadNextMatch(t *testing.T) {
 
 func TestSubstituteTeam(t *testing.T) {
 	arena := setupTestArena(t)
+	tournament.CreateTestAlliances(arena.Database, 2)
+	arena.CreatePlayoffBracket()
 
 	arena.Database.CreateTeam(&model.Team{Id: 101})
 	arena.Database.CreateTeam(&model.Team{Id: 102})
