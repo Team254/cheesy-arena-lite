@@ -6,6 +6,7 @@
 package web
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/Team254/cheesy-arena-lite/game"
@@ -585,6 +586,28 @@ func (web *Web) wpaKeysCsvReportHandler(w http.ResponseWriter, r *http.Request) 
 			handleWebErr(w, err)
 			return
 		}
+	}
+}
+
+// Generates a PDF-formatted report of the playoff bracket, relying on the browser to convert SVG to PDF (since no
+// suitable Go library for doing so appears to exist).
+func (web *Web) bracketPdfReportHandler(w http.ResponseWriter, r *http.Request) {
+	buffer := new(bytes.Buffer)
+	err := web.generateBracketSvg(buffer)
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+
+	template, err := web.parseFiles("templates/bracket_report.html")
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+	err = template.ExecuteTemplate(w, "bracket_report.html", buffer.String())
+	if err != nil {
+		handleWebErr(w, err)
+		return
 	}
 }
 
