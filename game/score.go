@@ -11,13 +11,6 @@ type Score struct {
 	EndgamePoints int
 }
 
-type ScoreSummary struct {
-	AutoPoints    int
-	TeleopPoints  int
-	EndgamePoints int
-	Score         int
-}
-
 // Calculates and returns the summary fields used for ranking and display.
 func (score *Score) Summarize() *ScoreSummary {
 	summary := new(ScoreSummary)

@@ -7,6 +7,7 @@ package web
 
 import (
 	"fmt"
+	"github.com/Team254/cheesy-arena-lite/game"
 	"github.com/Team254/cheesy-arena-lite/model"
 	"net/http"
 	"strconv"
@@ -313,7 +314,7 @@ func (web *Web) canResetAllianceSelection() bool {
 		return false
 	}
 	for _, match := range matches {
-		if match.Status != model.MatchNotPlayed {
+		if match.Status != game.MatchNotPlayed {
 			return false
 		}
 	}
