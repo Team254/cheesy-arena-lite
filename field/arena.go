@@ -114,14 +114,6 @@ func NewArena(dbPath string) (*Arena, error) {
 
 	arena.Displays = make(map[string]*Display)
 
-	// Reconstruct the playoff bracket in memory.
-	if err = arena.CreatePlayoffBracket(); err != nil {
-		return nil, err
-	}
-	if err = arena.UpdatePlayoffBracket(nil); err != nil {
-		return nil, err
-	}
-
 	// Load empty match as current.
 	arena.MatchState = PreMatch
 	arena.LoadTestMatch()
@@ -170,6 +162,14 @@ func (arena *Arena) LoadSettings() error {
 	game.MatchTiming.WarningRemainingDurationSec = settings.WarningRemainingDurationSec
 	game.UpdateMatchSounds()
 	arena.MatchTimingNotifier.Notify()
+
+	// Reconstruct the playoff bracket in memory.
+	if err = arena.CreatePlayoffBracket(); err != nil {
+		return err
+	}
+	if err = arena.UpdatePlayoffBracket(nil); err != nil {
+		return err
+	}
 
 	return nil
 }
