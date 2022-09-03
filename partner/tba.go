@@ -48,15 +48,17 @@ type TbaAlliance struct {
 }
 
 type TbaRanking struct {
-	TeamKey    string `json:"team_key"`
-	Rank       int    `json:"rank"`
-	RP         float32
-	Auto       int
-	Endgame    int
-	Teleop     int
-	WinLossTie string
-	Dqs        int `json:"dqs"`
-	Played     int `json:"played"`
+	TeamKey string `json:"team_key"`
+	Rank    int    `json:"rank"`
+	RP      float32
+	Auto    int
+	Endgame int
+	Teleop  int
+	Wins    int `json:"wins"`
+	Losses  int `json:"losses"`
+	Ties    int `json:"ties"`
+	Dqs     int `json:"dqs"`
+	Played  int `json:"played"`
 }
 
 type TbaRankings struct {
@@ -99,6 +101,33 @@ type TbaPublishedAward struct {
 	Name    string `json:"name_str"`
 	TeamKey string `json:"team_key"`
 	Awardee string `json:"awardee"`
+}
+
+type elimMatchKey struct {
+	elimRound int
+	elimGroup int
+}
+
+type tbaElimMatchKey struct {
+	compLevel string
+	setNumber int
+}
+
+var doubleEliminationMatchKeyMapping = map[elimMatchKey]tbaElimMatchKey{
+	{1, 1}: {"ef", 1},
+	{1, 2}: {"ef", 2},
+	{1, 3}: {"ef", 3},
+	{1, 4}: {"ef", 4},
+	{2, 1}: {"ef", 5},
+	{2, 2}: {"ef", 6},
+	{2, 3}: {"qf", 1},
+	{2, 4}: {"qf", 2},
+	{3, 1}: {"qf", 3},
+	{3, 2}: {"qf", 4},
+	{4, 1}: {"sf", 1},
+	{4, 2}: {"sf", 2},
+	{5, 1}: {"f", 1},
+	{6, 1}: {"f", 2},
 }
 
 func NewTbaClient(eventCode, secretId, secret string) *TbaClient {
@@ -266,6 +295,10 @@ func (client *TbaClient) PublishMatches(database *model.Database) error {
 	if err != nil {
 		return err
 	}
+	eventSettings, err := database.GetEventSettings()
+	if err != nil {
+		return err
+	}
 	matches := append(qualMatches, elimMatches...)
 	tbaMatches := make([]TbaMatch, len(matches))
 
@@ -301,9 +334,7 @@ func (client *TbaClient) PublishMatches(database *model.Database) error {
 		tbaMatches[i] = TbaMatch{"qm", 0, matchNumber, alliances, match.Time.Local().Format("3:04 PM"),
 			match.Time.UTC().Format("2006-01-02T15:04:05")}
 		if match.Type == "elimination" {
-			tbaMatches[i].CompLevel = map[int]string{1: "f", 2: "sf", 4: "qf", 8: "ef"}[match.ElimRound]
-			tbaMatches[i].SetNumber = match.ElimGroup
-			tbaMatches[i].MatchNumber = match.ElimInstance
+			setElimMatchKey(&tbaMatches[i], &match, eventSettings.ElimType)
 		}
 	}
 	jsonBody, err := json.Marshal(tbaMatches)
@@ -331,14 +362,21 @@ func (client *TbaClient) PublishRankings(database *model.Database) error {
 	}
 
 	// Build a JSON object of TBA-format rankings.
-	breakdowns := []string{"RP", "Auto", "Endgame", "Teleop", "WinLossTie"}
+	breakdowns := []string{"RP", "Auto", "Endgame", "Teleop"}
 	tbaRankings := make([]TbaRanking, len(rankings))
 	for i, ranking := range rankings {
-		tbaRankings[i] = TbaRanking{getTbaTeam(ranking.TeamId), ranking.Rank,
-			float32(ranking.RankingPoints) / float32(ranking.Played), ranking.AutoPoints, ranking.EndgamePoints,
-			ranking.TeleopPoints,
-			fmt.Sprintf("%d-%d-%d", ranking.Wins, ranking.Losses, ranking.Ties), 0,
-			ranking.Played}
+		tbaRankings[i] = TbaRanking{
+			TeamKey: getTbaTeam(ranking.TeamId),
+			Rank:    ranking.Rank,
+			RP:      float32(ranking.RankingPoints) / float32(ranking.Played),
+			Auto:    ranking.AutoPoints,
+			Endgame: ranking.EndgamePoints,
+			Teleop:  ranking.TeleopPoints,
+			Wins:    ranking.Wins,
+			Losses:  ranking.Losses,
+			Ties:    ranking.Ties,
+			Played:  ranking.Played,
+		}
 	}
 	jsonBody, err := json.Marshal(TbaRankings{breakdowns, tbaRankings})
 	if err != nil {
@@ -503,11 +541,17 @@ func (client *TbaClient) PublishAwards(database *model.Database) error {
 	return nil
 }
 
-// Returns the sum of all values in the slice representing different stages for a power cell goal.
-func sumPowerCells(cells []int) int {
-	var total int
-	for _, cell := range cells {
-		total += cell
+// Sets the match key attributes on TbaMatch based on the match and bracket type.
+func setElimMatchKey(tbaMatch *TbaMatch, match *model.Match, elimType string) {
+	if elimType == "single" {
+		tbaMatch.CompLevel = map[int]string{1: "ef", 2: "qf", 3: "sf", 4: "f"}[match.ElimRound]
+		tbaMatch.SetNumber = match.ElimGroup
+		tbaMatch.MatchNumber = match.ElimInstance
+	} else if elimType == "double" {
+		if tbaKey, ok := doubleEliminationMatchKeyMapping[elimMatchKey{match.ElimRound, match.ElimGroup}]; ok {
+			tbaMatch.CompLevel = tbaKey.compLevel
+			tbaMatch.SetNumber = tbaKey.setNumber
+		}
+		tbaMatch.MatchNumber = match.ElimInstance
 	}
-	return total
 }
