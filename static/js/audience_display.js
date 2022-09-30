@@ -170,7 +170,7 @@ var handleScorePosted = function(data) {
   $("#finalMatchName").text(data.MatchType + " " + data.Match.DisplayName);
 
   // Reload the bracket to reflect any changes.
-  $("#bracketSvg").attr("src", "/api/bracket/svg?v=" + new Date().getTime());
+  $("#bracketSvg").attr("src", "/api/bracket/svg?activeMatch=saved&v=" + new Date().getTime());
 };
 
 // Handles a websocket message to play a sound to signal match start/stop/etc.
